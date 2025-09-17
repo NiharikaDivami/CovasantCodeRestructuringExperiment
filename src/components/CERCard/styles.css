@@ -1,0 +1,102 @@
+/* CER Card Component Styles */
+.cer-card-container {
+  transition: box-shadow 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.cer-card-container:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cer-card-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 0.5rem;
+}
+
+.cer-card-loading-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2563eb;
+}
+
+.cer-card-loading-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.cer-card-content {
+  padding: 1.5rem;
+}
+
+.cer-card-content-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cer-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cer-card-header-content {
+  flex: 1;
+}
+
+.cer-card-id {
+  font-weight: bold;
+  font-size: 1.125rem;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.cer-card-vendor {
+  color: #374151;
+  font-weight: 500;
+}
+
+.cer-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cer-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cer-card-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cer-card-open-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cer-card-analytics-button {
+  padding: 0.25rem;
+}
+
+.cer-card-agent-badge {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  font-size: 0.75rem;
+}

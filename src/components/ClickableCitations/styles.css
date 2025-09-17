@@ -1,0 +1,57 @@
+/* ClickableCitations Component Styles */
+
+/* Citation button hover effects */
+.citation-button {
+  @apply inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors cursor-pointer font-medium border border-blue-200 hover:border-blue-300;
+  transition: all 0.2s ease-in-out;
+}
+
+.citation-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+}
+
+.citation-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Citation badge styles */
+.citation-badge {
+  @apply text-xs bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded border border-yellow-200;
+  font-weight: 500;
+}
+
+/* Document name styling */
+.citation-document-name {
+  @apply text-sm font-medium;
+  color: #1e40af;
+}
+
+/* Page info styling */
+.citation-page-info {
+  @apply text-xs text-gray-600;
+  opacity: 0.8;
+}
+
+/* Animation for citation highlight */
+@keyframes citation-highlight {
+  0% { background-color: rgba(59, 130, 246, 0.1); }
+  50% { background-color: rgba(59, 130, 246, 0.2); }
+  100% { background-color: rgba(59, 130, 246, 0.1); }
+}
+
+.citation-highlight-animation {
+  animation: citation-highlight 2s ease-in-out;
+}
+
+/* Responsive design for citations */
+@media (max-width: 640px) {
+  .citation-button {
+    @apply flex-col items-start space-x-0 space-y-1 px-3 py-2;
+  }
+  
+  .citation-page-info {
+    @apply text-xs;
+  }
+}

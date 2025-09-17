@@ -1,0 +1,98 @@
+/* CERDetailViewUpdated Component Styles */
+
+/* Inherits all styles from CERDetailView and adds additional styles for updated features */
+
+/* Placeholder states for unprocessed test scripts */
+.unprocessed-placeholder {
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  height: 1rem;
+  width: 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Enhanced vendor info card */
+.vendor-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.vendor-info-card h2 {
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+/* Enhanced confidence indicators */
+.confidence-indicator-updated {
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.confidence-indicator-updated:hover {
+  transform: scale(1.05);
+}
+
+/* Progressive disclosure animations */
+.progressive-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: reveal 0.5s ease-forward forwards;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced test script cards */
+.test-script-card-updated {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.test-script-card-updated:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.test-script-card-updated.processed {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+}
+
+.test-script-card-updated.unprocessed {
+  background: linear-gradient(145deg, #fafafa, #f3f4f6);
+  opacity: 0.7;
+}
+
+/* Enhanced loading states */
+.enhanced-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: loading-sweep 2s infinite;
+}
+
+@keyframes loading-sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}

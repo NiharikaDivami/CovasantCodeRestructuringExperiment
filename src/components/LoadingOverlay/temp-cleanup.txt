@@ -1,0 +1,2 @@
+Cleanup complete - removed duplicate index.tsx file.
+Main component is now at LoadingOverlay.tsx with proper index.ts export.
