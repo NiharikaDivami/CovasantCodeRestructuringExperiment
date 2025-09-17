@@ -1,18 +1,14 @@
-import { Badge } from "./ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Badge } from "../ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { TrendingUp, Info } from "lucide-react";
-
-interface ConfidenceBadgeProps {
-  status: "not-started" | "in-progress" | "finished" | "repopulated";
-  confidence?: number;
-  previousConfidence?: number;
-  tooltip?: string;
-}
+import type { ConfidenceBadgeProps } from "./types";
+import { CONFIDENCE_THRESHOLDS, TOOLTIP_CONTENTS } from "./constants";
+import "./styles.css";
 
 export default function ConfidenceBadge({ status, confidence, previousConfidence, tooltip }: ConfidenceBadgeProps) {
   const getConfidenceColor = (conf: number) => {
-    if (conf >= 85) return "bg-green-500 text-white";
-    if (conf >= 60) return "bg-amber-500 text-white";
+    if (conf >= CONFIDENCE_THRESHOLDS.high) return "bg-green-500 text-white";
+    if (conf >= CONFIDENCE_THRESHOLDS.medium) return "bg-amber-500 text-white";
     return "bg-red-500 text-white";
   };
 
@@ -32,11 +28,10 @@ export default function ConfidenceBadge({ status, confidence, previousConfidence
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <div className="text-xs">
-                  <p className="font-medium mb-1">Pending Analysis:</p>
-                  <p>• Awaiting AI agent processing</p>
-                  <p>• No confidence score available yet</p>
-                  <p>• Run agent to begin assessment</p>
-                  <p>• Evidence collection not started</p>
+                  <p className="font-medium mb-1">{TOOLTIP_CONTENTS.notStarted.title}</p>
+                  {TOOLTIP_CONTENTS.notStarted.lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -57,11 +52,11 @@ export default function ConfidenceBadge({ status, confidence, previousConfidence
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <div className="text-xs">
-                  <p className="font-medium mb-1">Preliminary Assessment:</p>
-                  <p>• {tooltip || "Partial evidence, missing docs"}</p>
-                  <p>• Analysis in progress</p>
-                  <p>• Score may change with additional evidence</p>
-                  <p>• Awaiting complete documentation</p>
+                  <p className="font-medium mb-1">{TOOLTIP_CONTENTS.inProgress.title}</p>
+                  <p>• {tooltip || TOOLTIP_CONTENTS.inProgress.defaultFirstLine}</p>
+                  {TOOLTIP_CONTENTS.inProgress.lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -82,12 +77,10 @@ export default function ConfidenceBadge({ status, confidence, previousConfidence
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <div className="text-xs">
-                  <p className="font-medium mb-1">Analysis Complete</p>
-                  <p>• Based on evidence completeness and quality</p>
-                  <p>• AI assessment of control effectiveness</p>
-                  <p>• Validated against regulatory requirements</p>
-                  <p>• Analysis completed and verified</p>
-                  <p>• Final assessment available in detailed view</p>
+                  <p className="font-medium mb-1">{TOOLTIP_CONTENTS.finished.title}</p>
+                  {TOOLTIP_CONTENTS.finished.lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -116,12 +109,10 @@ export default function ConfidenceBadge({ status, confidence, previousConfidence
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <div className="text-xs">
-                  <p className="font-medium mb-1">Analysis Updated</p>
-                  <p>• AI re-analyzed with additional evidence</p>
-                  <p>• Human insights and conclusions incorporated</p>
-                  <p>• Updated assessment with improved data</p>
-                  <p>• Enhanced accuracy and reliability</p>
-                  <p>• Latest analysis available in detailed view</p>
+                  <p className="font-medium mb-1">{TOOLTIP_CONTENTS.repopulated.title}</p>
+                  {TOOLTIP_CONTENTS.repopulated.lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
                 </div>
               </TooltipContent>
             </Tooltip>
