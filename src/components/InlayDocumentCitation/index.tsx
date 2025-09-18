@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-aimport { Button } from "../ui/button";
+import { Button } from "../ui/button";
 import { DEFAULT_CITATION_PAGE } from "./constants";
 import { Citation, InlayDocumentCitationProps } from "./types";
 
@@ -380,7 +380,7 @@ The organization is a leading provider of cloud-based software solutions serving
 
 Core services include:
 • Software-as-a-Service (SaaS) platform hosting
-��� Data processing and analytics services
+• Data processing and analytics services
 • API integration services
 • Technical support and maintenance
 
