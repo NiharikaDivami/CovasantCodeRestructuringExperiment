@@ -1,21 +1,10 @@
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Search } from "lucide-react";
-
-interface FilterSidebarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  vendorFilter: string;
-  setVendorFilter: (vendor: string) => void;
-  riskFilter: string;
-  setRiskFilter: (risk: string) => void;
-  confidenceFilter: string;
-  setConfidenceFilter: (confidence: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
-}
+import type { FilterSidebarProps } from "./types";
+import { styles } from "./styles";
 
 export default function FilterSidebar({
   searchQuery,
@@ -27,33 +16,31 @@ export default function FilterSidebar({
   confidenceFilter,
   setConfidenceFilter,
   statusFilter,
-  setStatusFilter
+  setStatusFilter,
 }: FilterSidebarProps) {
   return (
-    <div className="w-80 bg-white border-r p-6 space-y-6">
+    <div style={styles.container}>
       <Card>
-        <CardHeader>
+        <CardHeader style={styles.cardHeader}>
           <CardTitle>Search & Filters</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search */}
-          <div className="space-y-2">
-            <Label htmlFor="search">Search CERs</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <CardContent>
+          <div style={styles.section}>
+            <Label htmlFor="search" style={styles.label}>Search CERs</Label>
+            <div style={styles.searchWrapper}>
+              <Search style={styles.searchIcon} />
               <Input
                 id="search"
                 placeholder="Search by vendor, CER ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                style={styles.searchInput}
               />
             </div>
           </div>
 
-          {/* Vendor Filter */}
-          <div className="space-y-2">
-            <Label htmlFor="vendor">Vendor</Label>
+          <div style={styles.section}>
+            <Label htmlFor="vendor" style={styles.label}>Vendor</Label>
             <Select value={vendorFilter} onValueChange={setVendorFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="All Vendors" />
@@ -68,9 +55,8 @@ export default function FilterSidebar({
             </Select>
           </div>
 
-          {/* Risk Level Filter */}
-          <div className="space-y-2">
-            <Label htmlFor="risk">Risk Level</Label>
+          <div style={styles.section}>
+            <Label htmlFor="risk" style={styles.label}>Risk Level</Label>
             <Select value={riskFilter} onValueChange={setRiskFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="All Levels" />
@@ -84,9 +70,8 @@ export default function FilterSidebar({
             </Select>
           </div>
 
-          {/* Confidence Filter */}
-          <div className="space-y-2">
-            <Label htmlFor="confidence">Confidence</Label>
+          <div style={styles.section}>
+            <Label htmlFor="confidence" style={styles.label}>Confidence</Label>
             <Select value={confidenceFilter} onValueChange={setConfidenceFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="All Confidence Levels" />
@@ -100,9 +85,8 @@ export default function FilterSidebar({
             </Select>
           </div>
 
-          {/* Status Filter */}
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+          <div style={styles.section}>
+            <Label htmlFor="status" style={styles.label}>Status</Label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="All Status" />

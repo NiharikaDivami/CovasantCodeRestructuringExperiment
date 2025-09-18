@@ -1,58 +1,193 @@
 import { useState, useEffect, useRef } from "react";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "./ui/sheet";
-import { ScrollArea } from "./ui/scroll-area";
-import { X } from "lucide-react";
-import { Button } from "./ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "../ui/button";
+import { DEFAULT_CITATION_PAGE } from "./constants";
+import { Citation, InlayDocumentCitationProps } from "./types";
 
-interface Citation {
-  documentName: string;
-  page: number;
-  paragraph: number;
-  highlightText: string;
-}
-
-interface DocumentCitationPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-  citation: Citation | null;
-  allCitations?: Citation[]; // All citations for the current document
-  currentCitationIndex?: number; // Current citation index
-}
-
-export default function DocumentCitationPanel({ 
-  isOpen, 
-  onClose, 
-  citation, 
-  allCitations = [], 
-  currentCitationIndex = 0 
-}: DocumentCitationPanelProps) {
+export default function InlayDocumentCitation({ citation, onClose, searchQuery = "", onMapToTextArea }: InlayDocumentCitationProps) {
   const citationRef = useRef<HTMLElement>(null);
-  const [currentPage, setCurrentPage] = useState(8); // Default to page 8 which has the citation
-  const [citationIndex, setCitationIndex] = useState(currentCitationIndex);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CITATION_PAGE);
+  const [selectedText, setSelectedText] = useState("");
+  const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [searchResults, setSearchResults] = useState<{page: number, matchCount: number}[]>([]);
+  const [currentSearchMatch, setCurrentSearchMatch] = useState(0);
+  const [totalSearchMatches, setTotalSearchMatches] = useState(0);
 
-  // Auto-navigate to citation page when panel opens
   useEffect(() => {
-    if (isOpen && citation) {
+    if (citation) {
       setCurrentPage(citation.page);
-      setCitationIndex(currentCitationIndex);
     }
-  }, [isOpen, citation?.page, citation?.documentName, currentCitationIndex]);
+  }, [citation]);
 
-  // Auto-scroll to highlighted citation
   useEffect(() => {
-    if (isOpen && citation && citationRef.current) {
-      const timer = setTimeout(() => {
+    if (citation && citationRef.current) {
+      setTimeout(() => {
         citationRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'center' 
         });
-      }, 200);
-      
-      return () => clearTimeout(timer);
+      }, 100);
     }
-  }, [isOpen, citation?.page, citation?.highlightText, currentPage]);
+  }, [citation, currentPage]);
 
-  // Document-specific page contents
+  useEffect(() => {
+    if (searchQuery && searchQuery.trim()) {
+      console.log('Search query changed to:', searchQuery);
+      performDocumentSearch(searchQuery);
+    } else {
+      setSearchResults([]);
+      setCurrentSearchMatch(0);
+      setTotalSearchMatches(0);
+    }
+  }, [searchQuery, citation]);
+
+  const performDocumentSearch = (query: string) => {
+    if (!citation || !query.trim()) {
+      setSearchResults([]);
+      setCurrentSearchMatch(0);
+      setTotalSearchMatches(0);
+      return;
+    }
+
+    const documentPages = getDocumentPages();
+    const results: {page: number, matchCount: number}[] = [];
+    let totalMatches = 0;
+
+    Object.entries(documentPages).forEach(([pageNum, content]) => {
+      const pageNumber = parseInt(pageNum);
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedQuery, 'gi');
+      const matches = content.match(searchRegex);
+      
+      if (matches && matches.length > 0) {
+        results.push({ page: pageNumber, matchCount: matches.length });
+        totalMatches += matches.length;
+      }
+    });
+
+    setSearchResults(results);
+    setTotalSearchMatches(totalMatches);
+    setCurrentSearchMatch(1);
+
+    if (results.length > 0 && !results.find(r => r.page === currentPage)) {
+      setCurrentPage(results[0].page);
+    }
+  };
+
+  const goToNextSearchResult = () => {
+    if (searchResults.length === 0) return;
+    
+    const currentPageResults = searchResults.find(r => r.page === currentPage);
+    if (currentPageResults) {
+      if (currentSearchMatch < getTotalMatchesUpToPage(currentPage)) {
+        setCurrentSearchMatch(currentSearchMatch + 1);
+        return;
+      }
+    }
+    
+    const currentResultIndex = searchResults.findIndex(r => r.page === currentPage);
+    const nextResultIndex = (currentResultIndex + 1) % searchResults.length;
+    const nextPage = searchResults[nextResultIndex].page;
+    
+    setCurrentPage(nextPage);
+    setCurrentSearchMatch(getTotalMatchesUpToPage(nextPage - 1) + 1);
+  };
+
+  const goToPreviousSearchResult = () => {
+    if (searchResults.length === 0) return;
+    
+    if (currentSearchMatch > getTotalMatchesUpToPage(currentPage - 1) + 1) {
+      setCurrentSearchMatch(currentSearchMatch - 1);
+      return;
+    }
+    
+    const currentResultIndex = searchResults.findIndex(r => r.page === currentPage);
+    const prevResultIndex = currentResultIndex === 0 ? searchResults.length - 1 : currentResultIndex - 1;
+    const prevPage = searchResults[prevResultIndex].page;
+    
+    setCurrentPage(prevPage);
+    const prevPageResults = searchResults.find(r => r.page === prevPage);
+    setCurrentSearchMatch(getTotalMatchesUpToPage(prevPage));
+  };
+
+  const getTotalMatchesUpToPage = (page: number) => {
+    return searchResults
+      .filter(r => r.page <= page)
+      .reduce((total, r) => total + r.matchCount, 0);
+  };
+
+  const handleTextSelection = (event: React.MouseEvent) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString().trim();
+      setSelectedText(selectedText);
+    } else {
+      setContextMenuVisible(false);
+      setSelectedText("");
+    }
+  };
+
+  const handleContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault();
+    
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 0) {
+      const selectedText = selection.toString().trim();
+      setSelectedText(selectedText);
+      
+      const menuWidth = 150;
+      const menuHeight = 40;
+      let x = event.clientX;
+      let y = event.clientY;
+      
+      if (x + menuWidth > window.innerWidth) {
+        x = window.innerWidth - menuWidth - 10;
+      }
+      if (y + menuHeight > window.innerHeight) {
+        y = event.clientY - menuHeight;
+      }
+      
+      setContextMenuPosition({ x, y });
+      setContextMenuVisible(true);
+    }
+  };
+
+  const handleMapToTextArea = () => {
+    if (selectedText && onMapToTextArea) {
+      onMapToTextArea(selectedText);
+      setContextMenuVisible(false);
+      setSelectedText("");
+      
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      setContextMenuVisible(false);
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContextMenuVisible(false);
+      }
+    };
+
+    if (contextMenuVisible) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('keydown', handleEscapeKey);
+      };
+    }
+  }, [contextMenuVisible]);
+
   const getDocumentPages = () => {
     if (citation?.documentName === "IPSRA Risk Scorecard") {
       return {
@@ -405,350 +540,272 @@ Supplemental materials include:
 These materials provide additional context and support for the assessment conclusions and recommendations.`
       };
     }
-    return {};
+    return {} as Record<number, string>;
   };
 
-  // Get the current page content
   const getCurrentPageContent = () => {
-    try {
-      const documentPages = getDocumentPages();
-      return documentPages[currentPage] || "Page content not available.";
-    } catch (error) {
-      console.warn('Error getting page content:', error);
-      return "Page content unavailable.";
+    const documentPages = getDocumentPages();
+    return documentPages[currentPage] || "Page content not available.";
+  };
+
+  const getTotalPages = () => {
+    const documentPages = getDocumentPages();
+    return Object.keys(documentPages).length;
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
-  // Document metadata for the left panel
-  const getDocumentMetadata = () => {
-    if (displayCitation?.documentName === "IPSRA Risk Scorecard") {
-      return {
-        title: "IPSRA Risk Scorecard",
-        totalPages: 12,
-        sections: [
-          { page: 1, title: "Executive Summary" },
-          { page: 2, title: "Scope and Methodology" },
-          { page: 3, title: "Technical Infrastructure Assessment" },
-          { page: 4, title: "Access Control Evaluation" },
-          { page: 5, title: "Business Continuity Preparedness" },
-          { page: 6, title: "Compliance Posture Analysis" },
-          { page: 7, title: "Threat Landscape Analysis" },
-          { page: 8, title: "Vendor Risk Management" },
-          { page: 9, title: "Data Protection Assessment" },
-          { page: 10, title: "Security Monitoring and Response" },
-          { page: 11, title: "Risk Scoring Methodology" },
-          { page: 12, title: "Data Classification Standards", hasCitation: true }
-        ],
-        lastModified: "March 2025",
-        classification: "Confidential"
-      };
-    } else {
-      return {
-        title: "SOC 2 Security Report 2025",
-        totalPages: 15,
-        sections: [
-          { page: 1, title: "Executive Summary" },
-          { page: 2, title: "Scope and Methodology" },
-          { page: 3, title: "Company Overview" },
-          { page: 4, title: "Risk Assessment Framework" },
-          { page: 5, title: "Control Environment" },
-          { page: 6, title: "Information and Communication" },
-          { page: 7, title: "Security Framework Overview" },
-          { page: 8, title: "Data Encryption Standards", hasCitation: true },
-          { page: 9, title: "Access Control Implementation" },
-          { page: 10, title: "Network Security Architecture" },
-          { page: 11, title: "Incident Response Procedures" },
-          { page: 12, title: "Data Classification Standards" },
-          { page: 13, title: "Control Testing Results" },
-          { page: 14, title: "Management Responses" },
-          { page: 15, title: "Appendices and Supplemental Information", hasCitation: true }
-        ],
-        lastModified: "March 2025",
-        classification: "Confidential"
-      };
+  const goToNextPage = () => {
+    const totalPages = getTotalPages();
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
     }
   };
-
-  const documentMetadata = getDocumentMetadata();
-
-  const handlePageClick = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // Citation navigation functions
-  const getCurrentCitation = () => {
-    if (allCitations.length > 0 && citationIndex >= 0 && citationIndex < allCitations.length) {
-      return allCitations[citationIndex];
-    }
-    return citation;
-  };
-
-  const handlePreviousCitation = () => {
-    if (citationIndex > 0 && allCitations.length > 0) {
-      const newIndex = citationIndex - 1;
-      setCitationIndex(newIndex);
-      const prevCitation = allCitations[newIndex];
-      if (prevCitation && prevCitation.page !== currentPage) {
-        setCurrentPage(prevCitation.page);
-      }
-    }
-  };
-
-  const handleNextCitation = () => {
-    if (citationIndex < allCitations.length - 1 && allCitations.length > 0) {
-      const newIndex = citationIndex + 1;
-      setCitationIndex(newIndex);
-      const nextCitation = allCitations[newIndex];
-      if (nextCitation && nextCitation.page !== currentPage) {
-        setCurrentPage(nextCitation.page);
-      }
-    }
-  };
-
-  const hasMultipleCitations = allCitations.length > 1;
-  const displayCitation = getCurrentCitation();
 
   const getHighlightedContent = (content: string, highlightText: string) => {
-    if (!highlightText || currentPage !== displayCitation?.page || !content) return content;
+    console.log('Search query received:', searchQuery);
     
-    try {
-      // Escape special regex characters to prevent regex errors
-      const escapedHighlight = highlightText.replace(/[.*+?^${}()|[\]\\]/g, '\\  const getHighlightedContent = (content: string, highlightText: string) => {
-    if (!highlightText || currentPage !== displayCitation?.page) return content;
+    const parts: Array<{ text: string; type: 'normal' | 'citation' | 'search'; ref?: React.RefObject<HTMLElement> } | {text: string; type: 'normal'}> = [];
+    let remainingContent = content;
     
-    const parts = content.split(new RegExp(`(${highlightText})`, 'gi'));
-    return parts.map((part, index) => 
-      part.toLowerCase() === highlightText.toLowerCase() ? 
-        <mark 
-          key={index} 
-          ref={citationRef}
-          className="bg-yellow-200 px-2 py-1 rounded font-medium border border-yellow-300"
-        >
-          {part}
-        </mark> : 
-        part
-    );
-  };');
-      const parts = content.split(new RegExp(`(${escapedHighlight})`, 'gi'));
+    if (highlightText && currentPage === citation?.page) {
+      const escapedHighlight = highlightText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedHighlight})`, 'gi');
+      const matches = [...remainingContent.matchAll(regex)];
       
-      return parts.map((part, index) => {
-        if (part.toLowerCase() === highlightText.toLowerCase()) {
+      if (matches.length > 0) {
+        let lastIndex = 0;
+        matches.forEach((match, index) => {
+          if (match.index! > lastIndex) {
+            parts.push({
+              text: remainingContent.substring(lastIndex, match.index),
+              type: 'normal'
+            });
+          }
+          
+          parts.push({
+            text: match[0],
+            type: 'citation',
+            ref: index === 0 ? citationRef : undefined
+          });
+          
+          lastIndex = match.index! + match[0].length;
+        });
+        
+        if (lastIndex < remainingContent.length) {
+          parts.push({
+            text: remainingContent.substring(lastIndex),
+            type: 'normal'
+          });
+        }
+      } else {
+        parts.push({ text: remainingContent, type: 'normal' });
+      }
+    } else {
+      parts.push({ text: remainingContent, type: 'normal' });
+    }
+    
+    if (searchQuery && searchQuery.trim()) {
+      console.log('Processing search highlighting for:', searchQuery);
+      const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(`(${escapedQuery})`, 'gi');
+      
+      const newParts: Array<{ text: string; type: 'normal' | 'citation' | 'search'; ref?: React.RefObject<HTMLElement> } | {text: string; type: 'normal'}> = [];
+      parts.forEach(part => {
+        if ((part as any).type === 'citation') {
+          newParts.push(part as any);
+        } else {
+          const searchMatches = [...(part as any).text.matchAll(searchRegex)];
+          if (searchMatches.length > 0) {
+            console.log('Found search matches:', searchMatches.length);
+            let lastIndex = 0;
+            searchMatches.forEach(match => {
+              if (match.index! > lastIndex) {
+                newParts.push({
+                  text: (part as any).text.substring(lastIndex, match.index),
+                  type: 'normal'
+                });
+              }
+              
+              newParts.push({
+                text: match[0],
+                type: 'search'
+              });
+              
+              lastIndex = match.index! + match[0].length;
+            });
+            
+            if (lastIndex < (part as any).text.length) {
+              newParts.push({
+                text: (part as any).text.substring(lastIndex),
+                type: 'normal'
+              });
+            }
+          } else {
+            newParts.push(part as any);
+          }
+        }
+      });
+      
+      return newParts.map((part, index) => {
+        if ((part as any).type === 'citation') {
           return (
             <mark 
-              key={`highlight-${index}`}
-              ref={index === 0 ? citationRef : null} // Only set ref on first occurrence
+              key={index}
+              ref={(part as any).ref}
               className="bg-yellow-200 px-2 py-1 rounded font-medium border border-yellow-300"
             >
-              {part}
+              {(part as any).text}
             </mark>
           );
+        } else if ((part as any).type === 'search') {
+          return (
+            <mark 
+              key={index}
+              className="bg-blue-200 px-1 py-0.5 rounded font-medium border border-blue-300"
+            >
+              {(part as any).text}
+            </mark>
+          );
+        } else {
+          return (part as any).text;
         }
-        return part;
       });
-    } catch (error) {
-      console.warn('Error highlighting content:', error);
-      return content;
     }
+    
+    return parts.map((part, index) => {
+      if ((part as any).type === 'citation') {
+        return (
+          <mark 
+            key={index}
+            ref={(part as any).ref}
+            className="bg-yellow-200 px-2 py-1 rounded font-medium border border-yellow-300"
+          >
+            {(part as any).text}
+          </mark>
+        );
+      } else {
+        return (part as any).text;
+      }
+    });
   };
 
-  if (!citation && !displayCitation) return null;
+  if (!citation) return null;
+
+  const totalPages = getTotalPages();
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[1200px] max-w-[95vw] p-0 gap-0 sm:max-w-[95vw] overflow-hidden mt-20">
-        <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
+    <div className="flex h-full overflow-hidden flex-col bg-white min-h-0 max-h-full">
+      <div className="bg-white border-b p-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center space-x-3">
+          <FileText className="h-4 w-4 text-blue-600" />
           <div>
-            <SheetTitle className="text-lg">Document Citation</SheetTitle>
-            <SheetDescription className="text-sm text-gray-600 mt-1">
-              View the source document and highlighted citation text
-            </SheetDescription>
-          </div>
-        </SheetHeader>
-        
-        <div className="flex h-[calc(100vh-120px)] overflow-hidden max-w-full">
-          {/* Left Panel - Document Information */}
-          <div className="w-72 border-r bg-gray-50 flex flex-col flex-shrink-0 overflow-hidden">
-            <div className="p-4 border-b bg-white flex-shrink-0">
-              <h3 className="text-sm font-medium">Document Information</h3>
-              <p className="text-xs text-gray-600 mt-1">{displayCitation?.documentName}</p>
+            <h2 className="text-sm font-medium text-gray-900">{citation.documentName}</h2>
+            <div className="flex items-center space-x-2 text-xs text-gray-600">
+              <span>
+                Page {currentPage}
+                {currentPage === citation.page && `, Paragraph ${citation.paragraph}`}
+              </span>
+              {currentPage === citation.page && (
+                <span className="text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border">Citation</span>
+              )}
             </div>
-            
-            <ScrollArea className="flex-1 overflow-auto">
-              <div className="p-4 space-y-4">
-                {/* Document Details */}
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Document Details</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total Pages:</span>
-                        <span>{documentMetadata.totalPages}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Last Modified:</span>
-                        <span>{documentMetadata.lastModified}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Classification:</span>
-                        <span className="text-red-600 font-medium">{documentMetadata.classification}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Citation Info */}
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Citation Details</h4>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Found on Page:</span>
-                          <span className="font-medium">{displayCitation?.page}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Paragraph:</span>
-                          <span className="font-medium">{displayCitation?.paragraph}</span>
-                        </div>
-                        {hasMultipleCitations && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Citation:</span>
-                            <span className="font-medium">{citationIndex + 1} of {allCitations.length}</span>
-                          </div>
-                        )}
-                        <div className="mt-2 pt-2 border-t border-yellow-200">
-                          <span className="text-xs text-yellow-700 font-medium">📍 Citation highlighted in document</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Table of Contents */}
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Table of Contents</h4>
-                    <div className="space-y-1">
-                      {documentMetadata.sections.map((section) => (
-                        <div
-                          key={section.page}
-                          onClick={() => handlePageClick(section.page)}
-                          className={`p-2 rounded text-sm cursor-pointer transition-colors hover:bg-gray-100 ${
-                            currentPage === section.page && section.page === displayCitation?.page
-                              ? 'bg-yellow-50 border border-yellow-300 ring-1 ring-yellow-400'
-                              : currentPage === section.page
-                              ? 'bg-blue-50 border border-blue-200 ring-1 ring-blue-300'
-                              : section.hasCitation
-                              ? 'bg-gray-50 border border-gray-300'
-                              : 'bg-white border border-gray-200'
-                          }`}
-                        >
-                          <div className="font-medium">Page {section.page}</div>
-                          <div className="text-xs text-gray-600 mt-1">{section.title}</div>
-                          {section.page === displayCitation?.page && currentPage === section.page && (
-                            <div className="text-xs text-yellow-700 mt-1 font-medium">📍 Citation highlighted below</div>
-                          )}
-                          {section.hasCitation && section.page !== displayCitation?.page && (
-                            <div className="text-xs text-gray-600 mt-1 font-medium">📄 Contains citation</div>
-                          )}
-                          {currentPage === section.page && section.page !== displayCitation?.page && (
-                            <div className="text-xs text-blue-700 mt-1 font-medium">👁 Currently viewing</div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Right Panel - Single Page Display */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Document Header */}
-            <div className="px-6 py-3 border-b bg-gray-50 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-base font-medium">{displayCitation?.documentName}</h4>
-                  <p className="text-sm text-gray-600">
-                    Page {currentPage} of {documentMetadata.totalPages} • {documentMetadata.sections.find(s => s.page === currentPage)?.title}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {hasMultipleCitations && (
-                    <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      Citation {citationIndex + 1} of {allCitations.length}
-                    </div>
-                  )}
-                  {currentPage === displayCitation?.page && (
-                    <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                      Citation highlighted below
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Single Page Content */}
-            <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <div className="bg-white border rounded-lg p-6 shadow-sm">
-                    <div className="mb-4 pb-4 border-b">
-                      <h2 className="text-lg font-medium text-gray-900">
-                        Page {currentPage}: {documentMetadata.sections.find(s => s.page === currentPage)?.title}
-                      </h2>
-                    </div>
-                    <div className="whitespace-pre-wrap leading-relaxed text-sm break-words word-wrap max-w-full">
-                      {getHighlightedContent(getCurrentPageContent(), displayCitation?.highlightText || '')}
-                    </div>
-                  </div>
-                </div>
-              </ScrollArea>
-            </div>
-
-            {/* Citation Navigation - Bottom Section */}
-            {hasMultipleCitations && (
-              <div className="px-6 py-4 border-t bg-gray-50 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-sm text-gray-600">
-                      Citation {citationIndex + 1} of {allCitations.length} in this document
-                    </div>
-                    {displayCitation?.page && (
-                      <div className="text-sm text-gray-500">
-                        Page {displayCitation.page}, Paragraph {displayCitation.paragraph}  
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePreviousCitation}
-                      disabled={citationIndex === 0}
-                      className="text-xs"
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                      Previous Citation
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNextCitation}
-                      disabled={citationIndex === allCitations.length - 1}
-                      className="text-xs"
-                    >
-                      Next Citation
-                      <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+        
+        {searchQuery && totalSearchMatches > 0 && (
+          <div className="flex items-center space-x-2 text-xs text-gray-600">
+            <span className="font-medium">
+              {currentSearchMatch} of {totalSearchMatches} results
+            </span>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousSearchResult}
+                disabled={totalSearchMatches <= 1}
+                className="h-6 w-6 p-0 hover:bg-gray-100"
+                title="Previous result"
+              >
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToNextSearchResult}
+                disabled={totalSearchMatches <= 1}
+                className="h-6 w-6 p-0 hover:bg-gray-100"
+                title="Next result"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-hidden bg-white">
+        <ScrollArea className="h-full">
+          <div className="p-4 bg-white min-h-full">
+            <div 
+              className="prose max-w-none text-sm leading-relaxed text-gray-800 whitespace-pre-wrap select-text cursor-text [&::selection]:bg-blue-200 [&::selection]:text-blue-900"
+              onMouseUp={handleTextSelection}
+              onContextMenu={handleContextMenu}
+            >
+              {getHighlightedContent(getCurrentPageContent(), citation.highlightText)}
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="bg-white border-t p-3 flex items-center justify-between flex-shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <span>Page {currentPage} of {totalPages}</span>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-2"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {contextMenuVisible && (
+        <div
+          className="fixed bg-white border border-gray-300 rounded-md shadow-xl z-[9999] py-1 min-w-[140px]"
+          style={{ left: contextMenuPosition.x, top: contextMenuPosition.y }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            onClick={handleMapToTextArea}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors duration-150"
+          >
+            Add to AI
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

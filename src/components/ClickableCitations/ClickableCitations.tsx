@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DocumentCitationPanel from "../DocumentCitationPanel";
+import DocumentCitationPanel from "../DocumentCitationPanel/index";
 import { Citation, ClickableCitationsProps } from "./types";
 import { 
   CITATION_REGEX, 
