@@ -1733,7 +1733,7 @@ export default function App() {
         onNotificationClick={handleNotificationClick}
         onMarkNotificationAsRead={handleMarkNotificationAsRead}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         {renderCurrentView()}
       </div>
       <LoadingOverlay
