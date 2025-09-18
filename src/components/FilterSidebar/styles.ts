@@ -1,7 +1,7 @@
 export const styles = {
   container: {
     width: 320,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#red',
     borderRight: '1px solid #e5e7eb',
     padding: 24,
   } as React.CSSProperties,
