@@ -9,7 +9,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { toast } from "sonner@2.0.3";
 import ClickableCitations from "../ClickableCitations";
 import SupportiveDocumentsPanel from "../SupportiveDocumentsPanel";
-import DocumentMentionTextarea from "../DocumentMentionTextarea";
+import DocumentMentionTextarea from "../DocumentMentionTextarea/index";
 import InlayDocumentCitation from "../InlayDocumentCitation";
 import ActivityLog from "../ActivityLog/ActivityLog";
 import type { ConversationalTranscriptDetailViewProps, ChatMessage } from "./types";
