@@ -6,24 +6,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { toast } from "sonner@2.0.3";
-
-interface RequestAdditionalDocumentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  testScriptId?: string;
-  thirdPartyRequirement?: string;
-  onSubmit?: (data: {
-    testScriptId: string;
-    thirdPartyRequirement: string;
-    analystNotes: string;
-  }) => void;
-}
+} from "../ui/dialog";
+import "./styles.css";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { toast } from "sonner";
+import type { RequestAdditionalDocumentModalProps } from "./types";
 
 export default function RequestAdditionalDocumentModal({
   isOpen,
@@ -93,43 +83,43 @@ export default function RequestAdditionalDocumentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Request Additional Document</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="request-modal-content">
+        <DialogHeader className="request-modal-header">
+          <DialogTitle className="request-modal-title">Request Additional Document</DialogTitle>
+          <DialogDescription className="request-modal-description">
             Request additional evidence or documentation from
             the vendor to support this test script.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="request-modal-fields">
           <div>
-            <Label htmlFor="test-script-id">
+            <Label htmlFor="test-script-id" className="request-modal-label">
               Test Script ID
             </Label>
             <Input
               id="test-script-id"
               value={testScriptId}
               disabled
-              className="bg-gray-50"
+              className="request-modal-input"
             />
           </div>
 
           <div>
-            <Label htmlFor="third-party-requirement">
+            <Label htmlFor="third-party-requirement" className="request-modal-label">
               Third Party Requirement
             </Label>
             <Textarea
               id="third-party-requirement"
               value={thirdPartyRequirement}
               disabled
-              className="bg-gray-50 resize-none"
+              className="request-modal-textarea"
               rows={3}
             />
           </div>
 
           <div>
-            <Label htmlFor="analyst-notes">
+            <Label htmlFor="analyst-notes" className="request-modal-label">
               Analyst Notes *
             </Label>
             <Textarea
@@ -138,12 +128,12 @@ export default function RequestAdditionalDocumentModal({
               value={analystNotes}
               onChange={(e) => setAnalystNotes(e.target.value)}
               rows={6}
-              className="resize-none mt-3"
+              className="request-modal-textarea"
             />
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="request-modal-footer">
           <Button
             variant="outline"
             onClick={handleClose}

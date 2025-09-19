@@ -8,17 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Checkbox } from "../ui/checkbox";
 import { ArrowLeft, Grid3X3, Table as TableIcon, ExternalLink, ChevronUp, ChevronDown, X, Info, Bot, User, RefreshCw, Search, Clock } from "lucide-react";
-import TestScriptCard from "../TestScriptCard";
+import TestScriptCard from "../TestScriptCard/TestScriptCard";
 import ConfidenceBadge from "../ConfidenceBadge";
 import ActivityLog from "../ActivityLog";
 import AgentLoaderView from "../AgentLoaderView";
 import { CERDetailViewUpdatedProps, TestScriptUpdated, VendorData } from "./types";
-import { 
-  VIEW_MODES, 
-  SORT_OPTIONS, 
-  SORT_ORDERS, 
-  FILTER_OPTIONS, 
-  CONFIDENCE_THRESHOLDS, 
+import {
+  VIEW_MODES,
+  SORT_OPTIONS,
+  SORT_ORDERS,
+  FILTER_OPTIONS,
+  CONFIDENCE_THRESHOLDS,
   RISK_LEVELS,
   VENDOR_DATA_MAP
 } from "./constants";
@@ -32,10 +32,10 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [sortBy, setSortBy] = useState<"title" | "disposition" | "confidence">("title");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  
+
   // State for collapsible activity log
   const [isActivityLogExpanded, setIsActivityLogExpanded] = useState(true);
-  
+
   // State for selected test scripts
   const [selectedTestScripts, setSelectedTestScripts] = useState<string[]>([]);
 
@@ -63,7 +63,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
           expectedEvidence: "Expense reports with manager signatures, receipt attachments, and business justification for expenses exceeding $500."
         },
         {
-          id: "ts-2", 
+          id: "ts-2",
           title: "TS-324473",
           name: "Verify Purchase Order Authorization",
           control: "CTRL-00234-PUR",
@@ -82,7 +82,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         },
         {
           id: "ts-3",
-          title: "TS-324474", 
+          title: "TS-324474",
           name: "Test Invoice Processing Controls",
           control: "CTRL-00234-INV",
           controlName: "Invoice Verification Process",
@@ -100,7 +100,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         },
         {
           id: "ts-4",
-          title: "TS-324475", 
+          title: "TS-324475",
           name: "Review Travel Expense Controls",
           control: "CTRL-00234-TRV",
           controlName: "Travel Expense Validation",
@@ -118,7 +118,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         },
         {
           id: "ts-5",
-          title: "TS-324476", 
+          title: "TS-324476",
           name: "Test Credit Card Reconciliation",
           control: "CTRL-00234-CCR",
           controlName: "Credit Card Reconciliation Process",
@@ -136,7 +136,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         },
         {
           id: "ts-6",
-          title: "TS-324477", 
+          title: "TS-324477",
           name: "Review Vendor Payment Controls",
           control: "CTRL-00234-VEN",
           controlName: "Vendor Payment Authorization",
@@ -174,7 +174,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         },
         {
           id: "ts-2",
-          title: "TS-325002", 
+          title: "TS-325002",
           name: "Test Contract Management Controls",
           control: "CTRL-00567-CON",
           controlName: "Contract Approval Process",
@@ -194,7 +194,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
       "CER-10892": [
         {
           id: "ts-1",
-          title: "TS-326001", 
+          title: "TS-326001",
           name: "Review IT Security Controls",
           control: "CTRL-00892-SEC",
           controlName: "Information Security Framework",
@@ -213,7 +213,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         {
           id: "ts-2",
           title: "TS-326002",
-          name: "Test Data Backup Controls", 
+          name: "Test Data Backup Controls",
           control: "CTRL-00892-BAK",
           controlName: "Data Backup and Recovery",
           risk: "medium",
@@ -230,13 +230,13 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         }
       ]
     };
-    
+
     const baseScripts = scriptDataByCER[cerId] || [];
-    
+
     // Show data only for test scripts that have been processed by the agent
     return baseScripts.map(script => {
       const hasBeenProcessed = processedTestScripts.has(script.id);
-      
+
       if (!hasBeenProcessed) {
         return {
           ...script,
@@ -247,7 +247,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
           humanInsightsSummary: null  // Will show placeholder for final conclusion
         };
       }
-      
+
       return script;
     });
   };
@@ -256,11 +256,11 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
 
   // Get vendor data for the CER
   const getVendorData = (id: string): VendorData => {
-    return VENDOR_DATA_MAP[id as keyof typeof VENDOR_DATA_MAP] || { 
-      vendor: "Unknown", 
-      riskLevel: "Medium", 
-      confidence: 50, 
-      status: "not-started" 
+    return VENDOR_DATA_MAP[id as keyof typeof VENDOR_DATA_MAP] || {
+      vendor: "Unknown",
+      riskLevel: "Medium",
+      confidence: 50,
+      status: "not-started"
     };
   };
 
@@ -269,13 +269,13 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
   // Filter and sort test scripts (same logic as original)
   const filteredAndSortedTestScripts = testScripts
     .filter(script => {
-      const matchesSearch = searchQuery === "" || 
+      const matchesSearch = searchQuery === "" ||
         script.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         script.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         script.control.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchesDisposition = dispositionFilter === "all" || script.disposition === dispositionFilter;
-      const matchesConfidence = confidenceFilter === "all" || 
+      const matchesConfidence = confidenceFilter === "all" ||
         (script.confidence !== null && (
           (confidenceFilter === "high" && script.confidence >= CONFIDENCE_THRESHOLDS.HIGH) ||
           (confidenceFilter === "medium" && script.confidence >= CONFIDENCE_THRESHOLDS.MEDIUM && script.confidence < CONFIDENCE_THRESHOLDS.HIGH) ||
@@ -286,7 +286,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
     })
     .sort((a, b) => {
       let compareValue = 0;
-      
+
       if (sortBy === "title") {
         compareValue = a.title.localeCompare(b.title);
       } else if (sortBy === "disposition") {
@@ -298,7 +298,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
         const bConf = b.confidence || 0;
         compareValue = aConf - bConf;
       }
-      
+
       return sortOrder === "asc" ? compareValue : -compareValue;
     });
 
@@ -381,8 +381,8 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredAndSortedTestScripts.map((script) => (
-              <tr 
-                key={script.id} 
+              <tr
+                key={script.id}
                 className="cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => onOpenScript(script.id)}
               >
@@ -417,8 +417,8 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
                   {script.disposition ? (
                     <Badge variant={
                       script.disposition === "Satisfactory" ? "default" :
-                      script.disposition === "Partially Satisfactory" ? "secondary" :
-                      script.disposition === "Not Satisfactory" ? "destructive" : "outline"
+                        script.disposition === "Partially Satisfactory" ? "secondary" :
+                          script.disposition === "Not Satisfactory" ? "destructive" : "outline"
                     }>
                       {script.disposition}
                     </Badge>
@@ -442,8 +442,8 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
                 <td className="px-4 py-4 whitespace-nowrap">
                   <span className={
                     script.risk === "high" ? "text-red-600 font-medium" :
-                    script.risk === "medium" ? "text-amber-600 font-medium" :
-                    "text-green-600 font-medium"
+                      script.risk === "medium" ? "text-amber-600 font-medium" :
+                        "text-green-600 font-medium"
                   }>
                     {script.risk.charAt(0).toUpperCase() + script.risk.slice(1)}
                   </span>
@@ -606,7 +606,7 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
 
           {/* Activity Log Section */}
           <Card className="bg-white">
-            <div 
+            <div
               className="flex items-center justify-between p-4 cursor-pointer"
               onClick={() => setIsActivityLogExpanded(!isActivityLogExpanded)}
             >
@@ -614,8 +614,8 @@ export default function CERDetailViewUpdated({ cerId, onBack, onOpenScript, scri
                 <Clock className="h-5 w-5 text-gray-600" />
                 <h3 className="font-medium text-gray-900">Recent Activity</h3>
               </div>
-              {isActivityLogExpanded ? 
-                <ChevronUp className="h-4 w-4 text-gray-600" /> : 
+              {isActivityLogExpanded ?
+                <ChevronUp className="h-4 w-4 text-gray-600" /> :
                 <ChevronDown className="h-4 w-4 text-gray-600" />
               }
             </div>

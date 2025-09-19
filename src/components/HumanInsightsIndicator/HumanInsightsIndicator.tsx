@@ -1,5 +1,6 @@
 import { User, Bot, CheckCircle } from "lucide-react";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
+import "./styles.css";
 
 interface HumanInsightsIndicatorProps {
   hasHumanInsights: boolean;
@@ -8,22 +9,22 @@ interface HumanInsightsIndicatorProps {
   className?: string;
 }
 
-export default function HumanInsightsIndicator({ 
-  hasHumanInsights, 
-  userName, 
+export default function HumanInsightsIndicator({
+  hasHumanInsights,
+  userName,
   timestamp,
   className = ""
 }: HumanInsightsIndicatorProps) {
   if (!hasHumanInsights) return null;
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
-      <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-        <User className="h-3 w-3 mr-1" />
+    <div className={`human-insights-indicator ${className}`}>
+      <span className="human-insights-badge">
+        <User className="human-insights-user" />
         Human Insights
-      </Badge>
-      <div className="flex items-center space-x-1 text-xs text-gray-500">
-        <CheckCircle className="h-3 w-3 text-green-600" />
+      </span>
+      <div className="human-insights-details">
+        <CheckCircle className="human-insights-check" />
         <span>Enhanced by {userName || 'Risk Analyst'}</span>
         {timestamp && (
           <span>• {new Date(timestamp).toLocaleDateString()}</span>

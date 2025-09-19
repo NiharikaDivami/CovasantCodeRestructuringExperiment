@@ -1,0 +1,121 @@
+/* Styles for SupportiveDocumentsPanel */
+
+.supportive-panel {
+  background: #fff;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 80px;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.supportive-panel.expanded {
+  width: 320px;
+}
+.supportive-panel.collapsed {
+  width: 64px;
+}
+
+.supportive-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  background: #fff;
+}
+.supportive-panel-header:hover {
+  background: #f9fafb;
+}
+
+.supportive-panel-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+.supportive-panel-subtitle {
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.supportive-panel-content {
+  flex: 1;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out;
+  position: relative;
+}
+.supportive-panel-content.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.supportive-panel-content.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.supportive-panel-scroll {
+  height: 100%;
+  position: relative;
+}
+
+.supportive-panel-list {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.supportive-panel-doc-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  transition: background 0.2s;
+}
+.supportive-panel-doc-card:hover {
+  background: #f3f4f6;
+}
+
+.supportive-panel-doc-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 4px;
+}
+.supportive-panel-doc-desc {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.supportive-panel-doc-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.supportive-panel-doc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.supportive-panel-doc-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.supportive-panel-doc-upload {
+  margin-top: 12px;
+}

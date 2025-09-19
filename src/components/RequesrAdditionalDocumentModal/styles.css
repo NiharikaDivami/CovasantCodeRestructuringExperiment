@@ -1,0 +1,60 @@
+/* Styles for RequestAdditionalDocumentModal */
+
+.request-modal-content {
+  max-width: 600px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+}
+
+.request-modal-header {
+  margin-bottom: 16px;
+}
+
+.request-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.request-modal-description {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.request-modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-modal-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #374151;
+}
+
+.request-modal-input,
+.request-modal-textarea {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  width: 100%;
+  resize: none;
+}
+
+.request-modal-textarea {
+  min-height: 80px;
+}
+
+.request-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}

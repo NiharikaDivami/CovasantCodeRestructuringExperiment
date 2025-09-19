@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Textarea } from "./ui/textarea";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Checkbox } from "./ui/checkbox";
-import { toast } from "sonner@2.0.3";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Textarea } from "../ui/textarea";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
+import { toast } from "sonner";
+import "./styles.css";
 
 interface RequestReuploadModalProps {
   isOpen: boolean;
@@ -66,7 +67,7 @@ export default function RequestReuploadModal({
       setAnalystNotes("");
       setOverrideExisting(true);
       setIsSubmitting(false);
-      
+
       // Show success toast
       toast("Re-upload request submitted successfully", {
         className: "border-green-500 bg-green-100 text-green-800 font-medium shadow-lg",
@@ -90,39 +91,39 @@ export default function RequestReuploadModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="request-modal-content">
         <DialogHeader>
           <DialogTitle>Request Document Re-upload</DialogTitle>
           <DialogDescription>
             Request the vendor to re-upload a document with updated or corrected information.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4">
+
+        <div className="request-modal-fields">
           <div>
-            <Label htmlFor="test-script-id">Test Script ID</Label>
+            <Label htmlFor="test-script-id" className="request-modal-label">Test Script ID</Label>
             <Input
               id="test-script-id"
               value={testScriptId}
               disabled
-              className="bg-gray-50"
+              className="request-modal-input"
             />
           </div>
 
           <div>
-            <Label htmlFor="document-name">Document Name</Label>
+            <Label htmlFor="document-name" className="request-modal-label">Document Name</Label>
             <Input
               id="document-name"
               value={documentName}
               disabled
-              className="bg-gray-50"
+              className="request-modal-input"
             />
           </div>
 
           <div>
-            <Label htmlFor="reason">Reason *</Label>
+            <Label htmlFor="reason" className="request-modal-label">Reason *</Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger>
+              <SelectTrigger className="request-modal-select">
                 <SelectValue placeholder="Select a reason" />
               </SelectTrigger>
               <SelectContent>
@@ -134,41 +135,41 @@ export default function RequestReuploadModal({
           </div>
 
           <div>
-            <Label htmlFor="analyst-notes">Analyst Notes</Label>
+            <Label htmlFor="analyst-notes" className="request-modal-label">Analyst Notes</Label>
             <Textarea
               id="analyst-notes"
               placeholder="Provide additional details about why the document needs to be re-uploaded..."
               value={analystNotes}
               onChange={(e) => setAnalystNotes(e.target.value)}
               rows={4}
-              className="resize-none"
+              className="request-modal-textarea"
             />
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="request-modal-checkbox-row">
             <Checkbox
               id="override-existing"
               checked={overrideExisting}
-              onCheckedChange={(checked) => setOverrideExisting(checked === true)}
+              onCheckedChange={(checked: any) => setOverrideExisting(checked === true)}
             />
             <Label
               htmlFor="override-existing"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="request-modal-checkbox-label"
             >
               Override the existing document
             </Label>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button 
-            variant="outline" 
+        <DialogFooter className="request-modal-footer">
+          <Button
+            variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

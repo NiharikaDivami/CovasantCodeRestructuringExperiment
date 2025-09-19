@@ -1,13 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner@2.0.3";
-import NavigationHeader from "./components/NavigationHeader";
+import NavigationHeader from "./components/NavigationHeader/NavigationHeader";
 import DashboardView from "./components/DashboardView/DashboardView";
-import CERDetailView  from "./components/CERDetailView/CERDetailView";
+import CERDetailView from "./components/CERDetailView/CERDetailView";
 import ConversationalTranscriptDetailView from "./components/ConversationalTranscriptDetailView";
 import VendorDashboardView from "./components/VendorDashboardView/index";
-import ManagerDashboardView from "./components/ManagerDashboardView";
+import ManagerDashboardView from "./components/ManagerDashboardView/ManagerDashboardView";
 import LoadingOverlay from "./components/LoadingOverlay/LoadingOverlay";
+import CERDetailViewUpdated from "./components/CERDetailViewUpdated";
 
 type ViewState =
   | { type: "dashboard" }
@@ -1723,7 +1724,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="w-screen h-screen flex flex-col bg-gray-50">
       <NavigationHeader
         breadcrumbs={getBreadcrumbs}
         currentPersona={currentPersona}

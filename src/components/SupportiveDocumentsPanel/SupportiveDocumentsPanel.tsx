@@ -1,11 +1,12 @@
-import { ScrollArea } from "./ui/scroll-area";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { FileText, Download, ExternalLink, Shield, AlertCircle, Calendar, User, ChevronLeft, ChevronRight, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import RequestReuploadModal from "./RequestReuploadModal";
-import RequestAdditionalDocumentModal from "./RequestAdditionalDocumentModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import RequestReuploadModal from "../RequestReuploadModal/RequestReuploadModal";
+import RequestAdditionalDocumentModal from "../RequesrAdditionalDocumentModal/RequestAdditionalDocumentModal";
+import "./styles.css";
 
 interface SupportiveDocument {
   id: string;
@@ -58,12 +59,12 @@ interface SupportiveDocumentsPanelProps {
   parentCerId?: string;
 }
 
-export default function SupportiveDocumentsPanel({ 
-  documents, 
-  scriptId, 
-  isOpen, 
-  onClose, 
-  isCollapsible, 
+export default function SupportiveDocumentsPanel({
+  documents,
+  scriptId,
+  isOpen,
+  onClose,
+  isCollapsible,
   onExpandedChange,
   thirdPartyRequirement = "",
   onRequestReupload,
@@ -173,7 +174,7 @@ export default function SupportiveDocumentsPanel({
   // Get re-upload requests for this test script
   const getReuploadRequests = () => {
     if (!scriptId || !sharedTestScripts.length) return [];
-    
+
     const testScript = sharedTestScripts.find(script => script.testScriptId === scriptId);
     return testScript?.reuploadRequests || [];
   };
@@ -181,7 +182,7 @@ export default function SupportiveDocumentsPanel({
   // Get additional document requests for this test script
   const getAdditionalDocumentRequests = () => {
     if (!scriptId || !sharedTestScripts.length) return [];
-    
+
     const testScript = sharedTestScripts.find(script => script.testScriptId === scriptId);
     return testScript?.additionalDocumentRequests || [];
   };
@@ -189,8 +190,8 @@ export default function SupportiveDocumentsPanel({
   // Check if a document has an active re-upload request (not approved or completed)
   const hasActiveReuploadRequest = (documentName: string) => {
     const reuploadRequests = getReuploadRequests();
-    return reuploadRequests.some(request => 
-      request.documentName === documentName && 
+    return reuploadRequests.some(request =>
+      request.documentName === documentName &&
       (request.status === "awaiting_upload" || request.status === "needs_review")
     );
   };
@@ -214,12 +215,12 @@ export default function SupportiveDocumentsPanel({
 
   return (
     <>
-      <div 
-        className={`bg-white transition-all duration-300 ease-in-out flex flex-col ${isExpanded ? 'w-80' : 'w-16'} absolute top-20 bottom-0 right-0 overflow-hidden border-l border-t border-gray-200`}
+      <div
+        className={`supportive-panel ${isExpanded ? 'expanded' : 'collapsed'}`}
       >
         {/* Collapsible Header */}
-        <div 
-          className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 border-b flex-shrink-0"
+        <div
+          className="supportive-panel-header"
           onClick={handleExpandToggle}
         >
           {isExpanded ? (
@@ -227,8 +228,8 @@ export default function SupportiveDocumentsPanel({
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-gray-600" />
                 <div>
-                  <h3 className="text-lg font-semibold">Supportive Documents</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="supportive-panel-title">Supportive Documents</h3>
+                  <p className="supportive-panel-subtitle">
                     {documents.length} documents available
                   </p>
                 </div>
@@ -241,7 +242,7 @@ export default function SupportiveDocumentsPanel({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <FileText className="h-5 w-5 text-gray-900 hover:text-gray-700 transition-colors cursor-pointer" />
+                    <FileText className="h-5 w-5 text-gray-900 cursor-pointer" />
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     <p>Supportive Documents</p>
@@ -251,16 +252,16 @@ export default function SupportiveDocumentsPanel({
             </div>
           )}
         </div>
-        
+
         {/* Collapsible Content */}
-        <div className={`${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-300 ease-in-out flex-1 overflow-hidden`}>
-          <div className="px-4 relative z-10 h-full">
-            <ScrollArea className="h-full relative">
-              <div className="space-y-4 relative py-4">
+        <div className={`supportive-panel-content ${isExpanded ? 'visible' : 'hidden'}`}>
+          <div className="supportive-panel-scroll">
+            <ScrollArea className="supportive-panel-scroll">
+              <div className="supportive-panel-list">
                 {/* Request Additional Document Button */}
-                <div className="pb-4 border-b">
-                  <Button 
-                    variant="outline" 
+                <div style={{ paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                  <Button
+                    variant="outline"
                     className="w-full flex items-center gap-2 h-9"
                     onClick={handleRequestAdditionalDocument}
                   >
@@ -271,25 +272,25 @@ export default function SupportiveDocumentsPanel({
 
                 {/* Additional Document Requests Section */}
                 {getAdditionalDocumentRequests().length > 0 && (
-                  <div className="pb-4 border-b">
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-gray-700">
+                  <div style={{ paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 500, color: '#374151' }}>
                         Additional Documents
                       </h4>
                       {getAdditionalDocumentRequests().map((request) => (
-                        <div key={request.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0 mt-1">
+                        <div key={request.id} className="supportive-panel-doc-card" style={{ background: 'linear-gradient(90deg, #eff6ff 0%, #e0e7ff 100%)', border: '1px solid #bfdbfe' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                            <div style={{ flexShrink: 0, marginTop: '4px' }}>
                               <FileText className="h-4 w-4 text-blue-500" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between mb-2">
-                                <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
-                                  {request.status === "needs_review" || request.status === "approved" 
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <h4 className="supportive-panel-doc-title" style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
+                                  {request.status === "needs_review" || request.status === "approved"
                                     ? request.requirement || request.analystNotes
                                     : request.analystNotes}
                                   {(request.status === "needs_review" || request.status === "approved") && (
-                                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-300 ml-2">
+                                    <Badge variant="outline" className="supportive-panel-doc-badge" style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #60a5fa', marginLeft: '8px' }}>
                                       Uploaded
                                     </Badge>
                                   )}
@@ -298,9 +299,9 @@ export default function SupportiveDocumentsPanel({
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button 
-                                          variant="ghost" 
-                                          size="sm" 
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
                                           className="h-6 w-6 p-0 hover:bg-gray-100"
                                           disabled={request.status === "awaiting_upload"}
                                         >
@@ -315,9 +316,9 @@ export default function SupportiveDocumentsPanel({
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button 
-                                          variant="ghost" 
-                                          size="sm" 
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
                                           className="h-6 w-6 p-0 hover:bg-gray-100"
                                           disabled={request.status === "awaiting_upload"}
                                         >
@@ -331,45 +332,41 @@ export default function SupportiveDocumentsPanel({
                                   </TooltipProvider>
                                 </div>
                               </div>
-                              
+
                               {request.status !== "awaiting_upload" && (
-                                <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                                <p className="supportive-panel-doc-desc">
                                   Additional document requested by analyst for compliance review
                                 </p>
                               )}
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-center text-xs text-gray-500">
-                                  <Calendar className="h-3 w-3 mr-1" />
+
+                              <div className="supportive-panel-doc-meta">
+                                <div>
+                                  <Calendar className="h-3 w-3" style={{ marginRight: '4px' }} />
                                   <span>Requested {new Date(request.requestedDate).toLocaleDateString()}</span>
                                 </div>
-                                
-                                <div className="flex items-center text-xs text-gray-500">
-                                  <User className="h-3 w-3 mr-1" />
+                                <div>
+                                  <User className="h-3 w-3" style={{ marginRight: '4px' }} />
                                   <span>Analyst Request</span>
                                 </div>
-                                
                                 {request.status !== "awaiting_upload" && (
-                                  <div className="text-xs text-gray-500">
-                                    Type: Additional Document
-                                  </div>
+                                  <div>Type: Additional Document</div>
                                 )}
                               </div>
-                              
-                              <div className="mt-3">
+
+                              <div className="supportive-panel-doc-upload">
                                 {request.status === "approved" ? (
-                                  <Button 
-                                    variant="default" 
-                                    size="sm" 
+                                  <Button
+                                    variant="default"
+                                    size="sm"
                                     className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
                                     onClick={() => handleRequestAdditionalDocument()}
                                   >
                                     Request Re-upload
                                   </Button>
                                 ) : request.status === "needs_review" ? (
-                                  <Button 
-                                    variant="default" 
-                                    size="sm" 
+                                  <Button
+                                    variant="default"
+                                    size="sm"
                                     className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
                                     onClick={() => handleRequestAdditionalDocument()}
                                   >
@@ -389,115 +386,124 @@ export default function SupportiveDocumentsPanel({
                   </div>
                 )}
 
-                
+
                 {documents.map((document) => {
                   // Check if this document has been re-uploaded
                   const reuploadRequestStatus = getReuploadRequestStatus(document.name);
                   const hasBeenReuploaded = reuploadRequestStatus === "needs_review" || reuploadRequestStatus === "approved";
                   const testScript = sharedTestScripts.find(script => script.testScriptId === scriptId);
                   const hasVendorReuploaded = testScript?.status === "Action Item Responded";
-                  
+
                   return (
-                  <div key={document.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 mt-1">
-                        {getTypeIcon(document.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
-                            {document.name}
-                            {(hasBeenReuploaded || hasVendorReuploaded) && (
-                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-300 ml-2">
-                                Re-uploaded
-                              </Badge>
-                            )}
-                          </h4>
-                          <div className="ml-2 flex-shrink-0 flex items-center gap-2">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 w-6 p-0 hover:bg-gray-100"
-                                    disabled={document.status !== "available"}
-                                  >
-                                    <Download className="h-3 w-3 text-gray-600" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Download</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 w-6 p-0 hover:bg-gray-100"
-                                    disabled={document.status !== "available"}
-                                  >
-                                    <ExternalLink className="h-3 w-3 text-gray-600" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>View</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
+                    <div key={document.id} className="supportive-panel-doc-card">
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <div style={{ flexShrink: 0, marginTop: '4px' }}>
+                          {getTypeIcon(document.type)}
                         </div>
-                        
-                        {document.description && (
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                            {document.description}
-                          </p>
-                        )}
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            <span>Updated {document.lastUpdated}</span>
-                          </div>
-                          
-                          <div className="flex items-center text-xs text-gray-500">
-                            <User className="h-3 w-3 mr-1" />
-                            <span>{document.owner}</span>
-                          </div>
-                          
-                          {document.size && (
-                            <div className="text-xs text-gray-500">
-                              Size: {document.size}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <h4 className="supportive-panel-doc-title">
+                              {document.name}
+                              {(hasBeenReuploaded || hasVendorReuploaded) && (
+                                <Badge variant="outline" className="supportive-panel-doc-badge" style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #60a5fa', marginLeft: '8px' }}>
+                                  Re-uploaded
+                                </Badge>
+                              )}
+                            </h4>
+                            <div className="ml-2 flex-shrink-0 flex items-center gap-2">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 hover:bg-gray-100"
+                                      disabled={document.status !== "available"}
+                                    >
+                                      <Download className="h-3 w-3 text-gray-600" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Download</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 hover:bg-gray-100"
+                                      disabled={document.status !== "available"}
+                                    >
+                                      <ExternalLink className="h-3 w-3 text-gray-600" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>View</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </div>
+                          </div>
+
+                          {document.description && (
+                            <p className="supportive-panel-doc-desc">{document.description}</p>
                           )}
-                        </div>
-                        
-                        <div className="mt-3">
-                          {(() => {
-                            const reuploadRequestStatus = getReuploadRequestStatus(document.name);
-                            const currentUploadState = getCurrentUploadState();
-                            
-                            // Check if vendor has re-uploaded (Action Item Responded status)
-                            const testScript = sharedTestScripts.find(script => script.testScriptId === scriptId);
-                            const hasVendorReuploaded = testScript?.status === "Action Item Responded";
-                            
-                            // If there's an active re-upload request for this document
-                            if (hasActiveReuploadRequest(document.name)) {
-                              if (reuploadRequestStatus === "awaiting_upload") {
+
+                          <div className="supportive-panel-doc-meta">
+                            <div>
+                              <Calendar className="h-3 w-3" style={{ marginRight: '4px' }} />
+                              <span>Updated {document.lastUpdated}</span>
+                            </div>
+                            <div>
+                              <User className="h-3 w-3" style={{ marginRight: '4px' }} />
+                              <span>{document.owner}</span>
+                            </div>
+                            {document.size && (
+                              <div>Size: {document.size}</div>
+                            )}
+                          </div>
+
+                          <div className="supportive-panel-doc-upload">
+                            {(() => {
+                              const reuploadRequestStatus = getReuploadRequestStatus(document.name);
+                              const currentUploadState = getCurrentUploadState();
+
+                              // Check if vendor has re-uploaded (Action Item Responded status)
+                              const testScript = sharedTestScripts.find(script => script.testScriptId === scriptId);
+                              const hasVendorReuploaded = testScript?.status === "Action Item Responded";
+
+                              // If there's an active re-upload request for this document
+                              if (hasActiveReuploadRequest(document.name)) {
+                                if (reuploadRequestStatus === "awaiting_upload") {
+                                  return (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-md p-2 text-center">
+                                      <span className="text-xs text-amber-700 font-medium">Upload Awaiting</span>
+                                    </div>
+                                  );
+                                } else if (reuploadRequestStatus === "needs_review") {
+                                  // After vendor uploads, show request re-upload button again
+                                  return (
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
+                                      onClick={() => handleRequestReupload(document)}
+                                    >
+                                      Request Re-upload
+                                    </Button>
+                                  );
+                                }
+                              }
+
+                              // If vendor has re-uploaded but no specific reupload request, show request button again
+                              if (hasVendorReuploaded) {
                                 return (
-                                  <div className="bg-amber-50 border border-amber-200 rounded-md p-2 text-center">
-                                    <span className="text-xs text-amber-700 font-medium">Upload Awaiting</span>
-                                  </div>
-                                );
-                              } else if (reuploadRequestStatus === "needs_review") {
-                                // After vendor uploads, show request re-upload button again
-                                return (
-                                  <Button 
-                                    variant="default" 
-                                    size="sm" 
+                                  <Button
+                                    variant="default"
+                                    size="sm"
                                     className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
                                     onClick={() => handleRequestReupload(document)}
                                   >
@@ -505,38 +511,23 @@ export default function SupportiveDocumentsPanel({
                                   </Button>
                                 );
                               }
-                            }
-                            
-                            // If vendor has re-uploaded but no specific reupload request, show request button again
-                            if (hasVendorReuploaded) {
+
+                              // Default request re-upload button
                               return (
-                                <Button 
-                                  variant="default" 
-                                  size="sm" 
+                                <Button
+                                  variant="default"
+                                  size="sm"
                                   className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
                                   onClick={() => handleRequestReupload(document)}
                                 >
                                   Request Re-upload
                                 </Button>
                               );
-                            }
-                            
-                            // Default request re-upload button
-                            return (
-                              <Button 
-                                variant="default" 
-                                size="sm" 
-                                className="h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
-                                onClick={() => handleRequestReupload(document)}
-                              >
-                                Request Re-upload
-                              </Button>
-                            );
-                          })()}
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>

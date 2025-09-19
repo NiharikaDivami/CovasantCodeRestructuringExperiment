@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Checkbox } from "../ui/checkbox";
 import { Grid3X3, Table as TableIcon, ExternalLink, ChevronUp, ChevronDown, X, Info, Bot, RefreshCw, Search } from "lucide-react";
-import TestScriptCard from "../TestScriptCard";
+import TestScriptCard from "../TestScriptCard/TestScriptCard";
 import { vendorMap, scriptDataByCER, scriptMap } from './constants'
 
 

@@ -1,50 +1,17 @@
 import { useState, memo } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "./ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "./ui/sheet";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "../ui/sheet";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
 import { User, LogOut, ChevronLeft, ChevronRight, Users, BarChart3, Bell, UserCircle, ChevronDown, Settings, Shield, AlertTriangle, ExternalLink } from "lucide-react";
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import covasantLogo from 'figma:asset/8252b3995a92f9c0df49a2d6d0a08c4d91d73449.png';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
+// import covasantLogo from 'figma:asset/8252b3995a92f9c0df49a2d6d0a08c4d91d73449.png';
 import newCovasantLogo from 'figma:asset/e83c2af77e18b0769514de1a84bc586feab1dd1b.png';
+import type { PersonaType, BreadcrumbItem, NavigationHeaderProps, Notification } from './types';
 
-interface BreadcrumbItem {
-  label: string;
-  onClick?: () => void;
-}
 
-type PersonaType = "analyst" | "vendor" | "manager";
-
-type Notification = {
-  id: string;
-  type: "vendor_submission" | "action_item_created" | "upload_needs_review" | "reupload_requested";
-  message: string;
-  timestamp: string;
-  testScriptId: string;
-  vendorName?: string;
-  submissionType?: "COQ Responded" | "Action Item Responded";
-  cerId?: string;
-  isRead: boolean;
-  needsApproval?: boolean;
-  documentName?: string;
-  reuploadReason?: string;
-};
-
-interface NavigationHeaderProps {
-  breadcrumbs?: BreadcrumbItem[];
-  currentPersona?: PersonaType;
-  onPersonaChange?: (persona: PersonaType) => void;
-  notifications?: Notification[];
-  unreadNotificationCount?: number;
-  onNotificationClick?: (notification: Notification) => void;
-  onMarkNotificationAsRead?: (notificationId: string) => void;
-  showSearch?: boolean;
-  searchPlaceholder?: string;
-  searchQuery?: string;
-  onSearchChange?: (query: string) => void;
-}
 
 const NavigationHeader = memo(function NavigationHeader({ 
   breadcrumbs = [], 

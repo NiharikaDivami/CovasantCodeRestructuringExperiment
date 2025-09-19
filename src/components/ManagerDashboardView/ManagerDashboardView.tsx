@@ -1,47 +1,48 @@
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { ScrollArea } from "./ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Progress } from "./ui/progress";
-import { 
-  TrendingUp, 
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { filterMultipliers, vendorCERMapping, getTimeSeriesData,logos  } from "./constants";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, Cell } from "recharts";
+import {
+  TrendingUp,
   TrendingDown,
-  AlertTriangle,
+  ArrowUpDown,
   Activity,
-  Calendar,
-  Shield,
-  Brain,
-  Plus,
-  MoreHorizontal,
   Users,
-  Clock,
+  Brain,
   Target,
   BarChart3,
-  PieChart,
   Eye,
-  Filter,
   ChevronRight,
   ArrowUp,
-  ArrowLeft,
   ExternalLink,
   Search,
-  FileText,
-  CheckCircle,
-  XCircle,
-  CircleDot,
-  Timer,
-  ArrowUpDown,
-  Zap,
-  AlertCircle,
-  TrendingUpIcon,
-  Construction,
-  UserCheck
+  // AlertTriangle,
+  // Calendar,
+  // Shield,
+  // Plus,
+  // MoreHorizontal,
+  // Clock,
+  // PieChart,
+  // Filter,
+  // ArrowLeft,
+  // FileText,
+  // CheckCircle,
+  // XCircle,
+  // CircleDot,
+  // Timer,
+  // Zap,
+  // AlertCircle,
+  // TrendingUpIcon,
+  // Construction,
+  // UserCheck
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, LineChart, Line, Cell } from "recharts";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+// import { ScrollArea } from "./ui/scroll-area";
+// import { Progress } from "./ui/progress";
 
 interface ManagerDashboardViewProps {
   onNavigateToVendor?: () => void;
@@ -53,14 +54,14 @@ interface ManagerDashboardViewProps {
 
 
 
-export default function ManagerDashboardView({ 
-  onNavigateToVendor, 
-  onViewChange, 
+export default function ManagerDashboardView({
+  // onNavigateToVendor, 
+  onViewChange,
   currentView: externalCurrentView,
   searchQuery: externalSearchQuery = "",
   onSearchChange
 }: ManagerDashboardViewProps) {
-  const [timePeriod, setTimePeriod] = useState("last3Years");
+  const [timePeriod, _setTimePeriod] = useState("last3Years");
   const [vendorViewMode, setVendorViewMode] = useState<"table" | "chart">("table");
   const [analystViewMode, setAnalystViewMode] = useState<"table" | "chart">("table");
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -70,7 +71,7 @@ export default function ManagerDashboardView({
   const [analystSortType, setAnalystSortType] = useState<"top5" | "low5">("top5");
   const [riskLevelFilter, setRiskLevelFilter] = useState("all");
   const [pipelineRiskFilter, setPipelineRiskFilter] = useState("all");
-  
+
   // Use external state if provided
   const activeCurrentView = externalCurrentView || currentView;
   const activeSearchQuery = externalSearchQuery || searchQuery;
@@ -80,14 +81,14 @@ export default function ManagerDashboardView({
     if (view === "dashboard") {
       handleSearchChange("");
     }
-    
+
     if (onViewChange) {
       onViewChange(view);
     } else {
       setCurrentView(view);
     }
   };
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  // const _scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Handle scroll to show/hide scroll-to-top button
   useEffect(() => {
@@ -125,56 +126,23 @@ export default function ManagerDashboardView({
   // Scroll to top function
   const scrollToTop = () => {
     const viewport = document.querySelector('[data-radix-scroll-area-viewport]');
-    
+
     if (viewport) {
       viewport.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-
-  // Vendor and CER mapping data - synchronized with Analyst and Vendor flows
-  // Total 20 vendors, each with one CER, exact mapping to match other flows
-  const vendorCERMapping = [
-    // Jacob Corman's 12 CERs (matches analyst flow exactly)
-    { cerId: "CER-10234", vendor: "Amazon Web Services", analyst: "Jacob Corman", testScriptCount: 6, riskLevel: "Critical" },
-    { cerId: "CER-10567", vendor: "Microsoft Azure", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Critical" },
-    { cerId: "CER-10892", vendor: "Google Cloud Platform", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Medium" },
-    { cerId: "CER-10901", vendor: "Adobe Systems", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Low" },
-    { cerId: "CER-10923", vendor: "Atlassian Corp", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Medium" },
-    { cerId: "CER-10956", vendor: "Zoom Video", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Low" },
-    { cerId: "CER-11001", vendor: "Oracle Corporation", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Critical" },
-    { cerId: "CER-11089", vendor: "Slack Technologies", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Medium" },
-    { cerId: "CER-11156", vendor: "Box Inc", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Critical" },
-    { cerId: "CER-11203", vendor: "HubSpot Inc", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Low" },
-    { cerId: "CER-11278", vendor: "Dropbox Inc", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Medium" },
-    { cerId: "CER-11324", vendor: "Zendesk Inc", analyst: "Jacob Corman", testScriptCount: 2, riskLevel: "Critical" },
-    
-    // Remaining 8 CERs distributed among 7 other analysts (uneven distribution)
-    { cerId: "CER-11567", vendor: "IBM Cloud", analyst: "Emily Rodriguez", testScriptCount: 2, riskLevel: "Medium" },
-    { cerId: "CER-11892", vendor: "Snowflake Inc", analyst: "Emily Rodriguez", testScriptCount: 2, riskLevel: "High" },
-    { cerId: "CER-12001", vendor: "ServiceNow", analyst: "Emily Rodriguez", testScriptCount: 2, riskLevel: "Medium" },
-    
-    { cerId: "CER-12234", vendor: "SAP SE", analyst: "Sarah Williams", testScriptCount: 2, riskLevel: "Low" },
-    { cerId: "CER-12567", vendor: "Workday Inc", analyst: "Sarah Williams", testScriptCount: 2, riskLevel: "Medium" },
-    
-    { cerId: "CER-13001", vendor: "MongoDB Inc", analyst: "Daniel Kim", testScriptCount: 3, riskLevel: "Medium" },
-    
-    { cerId: "CER-13234", vendor: "Databricks Inc", analyst: "Alex Chen", testScriptCount: 2, riskLevel: "High" },
-    
-    { cerId: "CER-13567", vendor: "Twilio Inc", analyst: "Maria Gonzalez", testScriptCount: 2, riskLevel: "Medium" }
-  ];
-
   // Enhanced KPI Data with detailed metrics - calculated from actual data
   const kpiData = (() => {
     const totalCERs = vendorCERMapping.length;
     const totalTestScripts = vendorCERMapping.reduce((sum, mapping) => sum + mapping.testScriptCount, 0);
-    const totalAnalysts = 8; // Exact count from our analyst mapping
-    
+    // const totalAnalysts = 8; // Exact count from our analyst mapping
+
     // Calculate actual metrics from vendor data
     const criticalCERS = vendorCERMapping.filter(v => v.riskLevel === "Critical").length;
     const highCERS = vendorCERMapping.filter(v => v.riskLevel === "High").length;
     const mediumCERS = vendorCERMapping.filter(v => v.riskLevel === "Medium").length;
     const lowCERS = vendorCERMapping.filter(v => v.riskLevel === "Low").length;
-    
+
     return [
       {
         title: "CER's Overview",
@@ -194,7 +162,7 @@ export default function ManagerDashboardView({
         ]
       },
       {
-        title: "Vendor Response Optimization", 
+        title: "Vendor Response Optimization",
         value: "92%",
         subValue: "Response Rate",
         trend: "+8%",
@@ -230,213 +198,7 @@ export default function ManagerDashboardView({
 
   // Time series data for practice effectiveness - 4 quarters only
   // Updated with actual data from vendorCERMapping for consistency
-  const timeSeriesData = (() => {
-    const totalCERs = vendorCERMapping.length;
-    const totalTestScripts = vendorCERMapping.reduce((sum, mapping) => sum + mapping.testScriptCount, 0);
-    
-    // Filter data based on risk level
-    const filteredCERs = riskLevelFilter === "all" ? vendorCERMapping : 
-      vendorCERMapping.filter(mapping => mapping.riskLevel.toLowerCase() === riskLevelFilter.toLowerCase());
-    
-    const filteredCERCount = filteredCERs.length;
-    const filteredTestScripts = filteredCERs.reduce((sum, mapping) => sum + mapping.testScriptCount, 0);
-    
-    // Adjust effectiveness based on risk level - with more dramatic variations
-    const getEffectivenessAdjustment = () => {
-      switch (riskLevelFilter) {
-        case "critical": return { current: -12, previous: -18 }; // More dramatic decrease for critical
-        case "high": return { current: -8, previous: -12 };
-        case "medium": return { current: 0, previous: 0 }; // Baseline
-        case "low": return { current: +6, previous: +4 }; // Better performance for low risk
-        default: return { current: 0, previous: 0 }; // All levels
-      }
-    };
-    
-    const adjustment = getEffectivenessAdjustment();
-    
-    return {
-      lastYear: [
-        { 
-          period: "Q1 2025", 
-          current: 91 + adjustment.current, 
-          previous: 78 + adjustment.previous, 
-          month: "Q1",
-          quarter: "Q1",
-          cersEvaluated: Math.floor(filteredCERCount * 0.4), // 40% of filtered CERs
-          testScriptsExecuted: Math.floor(filteredTestScripts * 0.45), // 45% of filtered scripts
-          avgClosureTime: 12,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 87,
-          riskReductionRate: 70,
-          complianceAdherence: 83,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 6,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.4),
-          historicalAvgClosureTime: 15,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 81,
-          historicalRiskReductionRate: 64,
-          historicalComplianceAdherence: 78
-        },
-        { 
-          period: "Q2 2025", 
-          current: 94 + adjustment.current, 
-          previous: 82 + adjustment.previous, 
-          month: "Q2",
-          quarter: "Q2",
-          cersEvaluated: Math.floor(totalCERs * 0.45), // 9 CERs (45% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.5), // 50% of total scripts
-          avgClosureTime: 11,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 89,
-          riskReductionRate: 73,
-          complianceAdherence: 85,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 7,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.42),
-          historicalAvgClosureTime: 14,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 83,
-          historicalRiskReductionRate: 66,
-          historicalComplianceAdherence: 80
-        },
-        { 
-          period: "Q3 2025", 
-          current: 96 + adjustment.current, 
-          previous: 85 + adjustment.previous, 
-          month: "Q3",
-          quarter: "Q3",
-          cersEvaluated: Math.floor(totalCERs * 0.5), // 10 CERs (50% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.55), // 55% of total scripts
-          avgClosureTime: 10,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 91,
-          riskReductionRate: 75,
-          complianceAdherence: 87,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 8,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.44),
-          historicalAvgClosureTime: 13,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 85,
-          historicalRiskReductionRate: 68,
-          historicalComplianceAdherence: 82
-        },
-        { 
-          period: "Q4 2025", 
-          current: 98 + adjustment.current, 
-          previous: 88 + adjustment.previous, 
-          month: "Q4",
-          quarter: "Q4",
-          cersEvaluated: Math.floor(totalCERs * 0.55), // 11 CERs (55% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.6), // 60% of total scripts
-          avgClosureTime: 9,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 93,
-          riskReductionRate: 77,
-          complianceAdherence: 89,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 8,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.46),
-          historicalAvgClosureTime: 12,
-          historicalAvgActionItems: 3, // Changed to integer
-          historicalActionItemsResolved: 87,
-          historicalRiskReductionRate: 70,
-          historicalComplianceAdherence: 84
-        }
-      ],
-      last3Years: [
-        { 
-          period: "Q1 2025", 
-          current: 91 + adjustment.current, 
-          previous: 78 + adjustment.previous, 
-          month: "Q1",
-          quarter: "Q1",
-          cersEvaluated: Math.floor(totalCERs * 0.4), // 8 CERs (40% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.45), // 45% of total scripts
-          avgClosureTime: 12,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 87,
-          riskReductionRate: 70,
-          complianceAdherence: 83,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 6,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.4),
-          historicalAvgClosureTime: 15,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 81,
-          historicalRiskReductionRate: 64,
-          historicalComplianceAdherence: 78
-        },
-        { 
-          period: "Q2 2025", 
-          current: 94 + adjustment.current, 
-          previous: 82 + adjustment.previous, 
-          month: "Q2",
-          quarter: "Q2",
-          cersEvaluated: Math.floor(totalCERs * 0.45), // 9 CERs (45% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.5), // 50% of total scripts
-          avgClosureTime: 11,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 89,
-          riskReductionRate: 73,
-          complianceAdherence: 85,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 7,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.42),
-          historicalAvgClosureTime: 14,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 83,
-          historicalRiskReductionRate: 66,
-          historicalComplianceAdherence: 80
-        },
-        { 
-          period: "Q3 2025", 
-          current: 96 + adjustment.current, 
-          previous: 85 + adjustment.previous, 
-          month: "Q3",
-          quarter: "Q3",
-          cersEvaluated: Math.floor(totalCERs * 0.5), // 10 CERs (50% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.55), // 55% of total scripts
-          avgClosureTime: 10,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 91,
-          riskReductionRate: 75,
-          complianceAdherence: 87,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 8,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.44),
-          historicalAvgClosureTime: 13,
-          historicalAvgActionItems: 4, // Changed to integer
-          historicalActionItemsResolved: 85,
-          historicalRiskReductionRate: 68,
-          historicalComplianceAdherence: 82
-        },
-        { 
-          period: "Q4 2025", 
-          current: 98 + adjustment.current, 
-          previous: 88 + adjustment.previous, 
-          month: "Q4",
-          quarter: "Q4",
-          cersEvaluated: Math.floor(totalCERs * 0.55), // 11 CERs (55% of 20)
-          testScriptsExecuted: Math.floor(totalTestScripts * 0.6), // 60% of total scripts
-          avgClosureTime: 9,
-          avgActionItems: 3, // Changed to integer
-          actionItemsResolved: 93,
-          riskReductionRate: 77,
-          complianceAdherence: 89,
-          // Historical averages for Last 3 Years cumulative
-          historicalCersEvaluated: 8,
-          historicalTestScriptsExecuted: Math.floor(totalTestScripts * 0.46),
-          historicalAvgClosureTime: 12,
-          historicalAvgActionItems: 3, // Changed to integer
-          historicalActionItemsResolved: 87,
-          historicalRiskReductionRate: 70,
-          historicalComplianceAdherence: 84
-        }
-      ]
-    };
-  })();
+  const timeSeriesData = getTimeSeriesData(vendorCERMapping, riskLevelFilter);
 
   // Enhanced Vendor Performance Data with 20 vendors - matches exact CER mapping
   const vendorPerformanceData = vendorCERMapping.map((mapping, index) => {
@@ -455,10 +217,9 @@ export default function ManagerDashboardView({
           return { compliance: 90, docAccept: 85, responseTime: "3.0", closureTime: "3.5" };
       }
     };
-    
+
     const performance = getPerformanceByRisk(mapping.riskLevel);
-    const logos = ["🟠", "🔷", "🔴", "🔶", "☁️", "🔵", "❄️", "🟢", "🔵", "🟡", "🔴", "🔷", "🔵", "🟣", "🔷", "🔵", "❄️", "🟢", "🟡", "🔴"];
-    
+
     return {
       id: index + 1,
       name: mapping.vendor,
@@ -481,14 +242,14 @@ export default function ManagerDashboardView({
       // Create composite performance score for sorting
       const scoreA = (a.complianceAdherence + a.documentAcceptanceRate) / 2 - parseFloat(a.responseTime) * 5;
       const scoreB = (b.complianceAdherence + b.documentAcceptanceRate) / 2 - parseFloat(b.responseTime) * 5;
-      
+
       if (vendorSortType === "top5") {
         return scoreB - scoreA; // Higher scores first (better performance)
       } else {
         return scoreA - scoreB; // Lower scores first (degrading performance)
       }
     });
-    
+
     return sortedData.slice(0, 5);
   };
 
@@ -498,35 +259,35 @@ export default function ManagerDashboardView({
   const vendorBarChartData = [
     {
       metric: "Compliance",
-      ...topVendorData.reduce((acc, vendor, index) => {
+      ...topVendorData.reduce((acc, vendor, _index) => {
         acc[vendor.name.split(' ')[0]] = vendor.complianceAdherence;
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Doc Acceptance",
-      ...topVendorData.reduce((acc, vendor, index) => {
+      ...topVendorData.reduce((acc, vendor, _index) => {
         acc[vendor.name.split(' ')[0]] = vendor.documentAcceptanceRate;
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Response Time",
-      ...topVendorData.reduce((acc, vendor, index) => {
+      ...topVendorData.reduce((acc, vendor, _index) => {
         acc[vendor.name.split(' ')[0]] = 100 - parseFloat(vendor.responseTime) * 20; // Convert to performance score
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Action Closure",
-      ...topVendorData.reduce((acc, vendor, index) => {
+      ...topVendorData.reduce((acc, vendor, _index) => {
         acc[vendor.name.split(' ')[0]] = 100 - parseFloat(vendor.actionItemClosureTime) * 15; // Convert to performance score
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Risk Score",
-      ...topVendorData.reduce((acc, vendor, index) => {
+      ...topVendorData.reduce((acc, vendor, _index) => {
         acc[vendor.name.split(' ')[0]] = vendor.riskRating === 'Low' ? 95 : vendor.riskRating === 'Medium' ? 75 : 55;
         return acc;
       }, {} as Record<string, number>)
@@ -551,7 +312,7 @@ export default function ManagerDashboardView({
     return [
       {
         id: 1,
-        name: "Jacob Corman", 
+        name: "Jacob Corman",
         role: `${analystAssignments["Jacob Corman"]?.cers.length || 0} CERs Assigned`,
         testScriptCount: analystAssignments["Jacob Corman"]?.totalTestScripts || 0,
         cersReviewed: analystAssignments["Jacob Corman"]?.cers.length || 0,
@@ -591,7 +352,7 @@ export default function ManagerDashboardView({
       {
         id: 4,
         name: "Daniel Kim",
-        role: `${analystAssignments["Daniel Kim"]?.cers.length || 0} CERs Assigned`, 
+        role: `${analystAssignments["Daniel Kim"]?.cers.length || 0} CERs Assigned`,
         testScriptCount: analystAssignments["Daniel Kim"]?.totalTestScripts || 0,
         cersReviewed: analystAssignments["Daniel Kim"]?.cers.length || 0,
         reviewingTime: "2.7 days",
@@ -660,19 +421,19 @@ export default function ManagerDashboardView({
   const getTopAnalystData = () => {
     // Filter out analysts with 0 CERs assigned
     const filteredData = analystPerformanceData.filter(analyst => analyst.cersReviewed > 0);
-    
+
     const sortedData = [...filteredData].sort((a, b) => {
       // Create composite effectiveness score for sorting
       const scoreA = a.effectiveness - a.reworkRate - parseFloat(a.reviewingTime) * 2;
       const scoreB = b.effectiveness - b.reworkRate - parseFloat(b.reviewingTime) * 2;
-      
+
       if (analystSortType === "top5") {
         return scoreB - scoreA; // Higher scores first (better performance)
       } else {
         return scoreA - scoreB; // Lower scores first (degrading performance)
       }
     });
-    
+
     return sortedData.slice(0, 5);
   };
 
@@ -682,35 +443,35 @@ export default function ManagerDashboardView({
   const analystBarChartData = [
     {
       metric: "CER Count",
-      ...topAnalystData.reduce((acc, analyst, index) => {
+      ...topAnalystData.reduce((acc, analyst, _index) => {
         acc[analyst.name.split(' ')[0]] = analyst.cersReviewed * 10; // Scale for visualization
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Test Scripts",
-      ...topAnalystData.reduce((acc, analyst, index) => {
+      ...topAnalystData.reduce((acc, analyst, _index) => {
         acc[analyst.name.split(' ')[0]] = analyst.testScriptCount;
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Review Speed",
-      ...topAnalystData.reduce((acc, analyst, index) => {
+      ...topAnalystData.reduce((acc, analyst, _index) => {
         acc[analyst.name.split(' ')[0]] = 100 - parseFloat(analyst.reviewingTime) * 30; // Convert to performance score
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Response Speed",
-      ...topAnalystData.reduce((acc, analyst, index) => {
+      ...topAnalystData.reduce((acc, analyst, _index) => {
         acc[analyst.name.split(' ')[0]] = 100 - parseFloat(analyst.responseTimeToVendor) * 5; // Convert to performance score
         return acc;
       }, {} as Record<string, number>)
     },
     {
       metric: "Effectiveness",
-      ...topAnalystData.reduce((acc, analyst, index) => {
+      ...topAnalystData.reduce((acc, analyst, _index) => {
         acc[analyst.name.split(' ')[0]] = analyst.effectiveness;
         return acc;
       }, {} as Record<string, number>)
@@ -732,7 +493,7 @@ export default function ManagerDashboardView({
         percentage: 35
       },
       {
-        stage: "Analyst Review\\nPending", 
+        stage: "Analyst Review\\nPending",
         count: 15,
         avgTime: "1.5 days",
         delayReasons: ["Analyst workload", "Additional evidence required"],
@@ -742,7 +503,7 @@ export default function ManagerDashboardView({
       {
         stage: "Action Item Closure\\nPending",
         count: 12,
-        avgTime: "2.1 days", 
+        avgTime: "2.1 days",
         delayReasons: ["Vendor response delays", "Document clarification needed"],
         color: "#f59e0b",
         percentage: 23
@@ -761,30 +522,6 @@ export default function ManagerDashboardView({
     if (pipelineRiskFilter === "all") {
       return basePipelineData;
     }
-
-    const filterMultipliers = {
-      critical: { 
-        counts: [1.5, 1.4, 1.3, 1.2], 
-        times: [1.3, 1.2, 1.4, 1.1], 
-        colors: ["#7c3aed", "#2563eb", "#dc2626", "#059669"] 
-      },
-      high: { 
-        counts: [1.2, 1.2, 1.1, 1.0], 
-        times: [1.1, 1.1, 1.2, 1.0], 
-        colors: ["#8b5cf6", "#3b82f6", "#f59e0b", "#10b981"] 
-      },
-      medium: { 
-        counts: [1.0, 1.0, 1.0, 1.0], 
-        times: [1.0, 1.0, 1.0, 1.0], 
-        colors: ["#8b5cf6", "#3b82f6", "#f59e0b", "#10b981"] 
-      },
-      low: { 
-        counts: [0.6, 0.7, 0.8, 0.9], 
-        times: [0.7, 0.8, 0.7, 0.9], 
-        colors: ["#a78bfa", "#60a5fa", "#fbbf24", "#34d399"] 
-      }
-    };
-
     const multipliers = filterMultipliers[pipelineRiskFilter as keyof typeof filterMultipliers] || filterMultipliers.medium;
 
     return basePipelineData.map((item, index) => ({
@@ -796,7 +533,7 @@ export default function ManagerDashboardView({
   })();
 
   // CER data for vendor analysis table - exact mapping from vendorCERMapping
-  const vendorCERData = vendorPerformanceData.map((vendor) => ({
+  const _vendorCERData = vendorPerformanceData.map((vendor) => ({
     id: vendor.cerId,
     vendor: vendor.name,
     riskLevel: vendor.riskRating,
@@ -805,20 +542,20 @@ export default function ManagerDashboardView({
     analyst: vendor.analyst
   }));
 
-  const getRiskLevelTextColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case "Critical":
-        return "text-red-600";
-      case "High":
-        return "text-red-600";
-      case "Medium":
-        return "text-amber-600";
-      case "Low":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+  // const getRiskLevelTextColor = (riskLevel: string) => {
+  //   switch (riskLevel) {
+  //     case "Critical":
+  //       return "text-red-600";
+  //     case "High":
+  //       return "text-red-600";
+  //     case "Medium":
+  //       return "text-amber-600";
+  //     case "Low":
+  //       return "text-green-600";
+  //     default:
+  //       return "text-gray-600";
+  //   }
+  // };
 
   // Render vendor analysis view
   const renderVendorAnalysisView = () => (
@@ -927,13 +664,12 @@ export default function ManagerDashboardView({
                               <span className="font-semibold text-gray-900 text-sm">{vendor.documentAcceptanceRate}%</span>
                             </td>
                             <td className="px-3 py-4 text-center">
-                              <Badge 
+                              <Badge
                                 variant={vendor.riskRating === "Low" ? "default" : vendor.riskRating === "Medium" ? "secondary" : "destructive"}
-                                className={`text-sm px-2 py-1 ${
-                                  vendor.riskRating === "Low" ? "bg-green-100 text-green-800 border-green-200" : 
+                                className={`text-sm px-2 py-1 ${vendor.riskRating === "Low" ? "bg-green-100 text-green-800 border-green-200" :
                                   vendor.riskRating === "Medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                                  "bg-red-100 text-red-800 border-red-200"
-                                }`}
+                                    "bg-red-100 text-red-800 border-red-200"
+                                  }`}
                               >
                                 {vendor.riskRating}
                               </Badge>
@@ -1079,13 +815,12 @@ export default function ManagerDashboardView({
                               <span className="text-gray-900 text-sm">{analyst.responseTimeToVendor}</span>
                             </td>
                             <td className="px-3 py-4 text-center">
-                              <Badge 
+                              <Badge
                                 variant={analyst.bottleneckProactiveness === "High" ? "default" : analyst.bottleneckProactiveness === "Medium" ? "secondary" : "destructive"}
-                                className={`text-sm px-2 py-1 ${
-                                  analyst.bottleneckProactiveness === "High" ? "bg-green-100 text-green-800 border-green-200" : 
+                                className={`text-sm px-2 py-1 ${analyst.bottleneckProactiveness === "High" ? "bg-green-100 text-green-800 border-green-200" :
                                   analyst.bottleneckProactiveness === "Medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                                  "bg-gray-100 text-gray-800 border-gray-200"
-                                }`}
+                                    "bg-gray-100 text-gray-800 border-gray-200"
+                                  }`}
                               >
                                 {analyst.bottleneckProactiveness}
                               </Badge>
@@ -1115,7 +850,7 @@ export default function ManagerDashboardView({
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Bottom Padding */}
             <div className="h-12"></div>
           </div>
@@ -1157,20 +892,18 @@ export default function ManagerDashboardView({
                     {/* Modern Header with Circular Progress */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <div className={`relative h-12 w-12 lg:h-14 lg:w-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                          kpi.color === "blue" ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200" :
+                        <div className={`relative h-12 w-12 lg:h-14 lg:w-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${kpi.color === "blue" ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200" :
                           kpi.color === "green" ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-green-200" :
-                          "bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200"
-                        } shadow-lg`}>
+                            "bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200"
+                          } shadow-lg`}>
                           {kpi.icon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xs lg:text-sm font-semibold text-gray-900 truncate mb-1">{kpi.title}</h3>
                           <div className="flex items-baseline space-x-2">
                             <span className="text-xl lg:text-2xl font-bold text-gray-900 truncate">{kpi.value}</span>
-                            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                              kpi.isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }`}>
+                            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${kpi.isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              }`}>
                               {kpi.isPositive ? (
                                 <TrendingUp className="h-3 w-3" />
                               ) : (
@@ -1182,7 +915,7 @@ export default function ManagerDashboardView({
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Visual Metrics with Progress Bars */}
                     <div className="space-y-3">
                       {kpi.details.slice(0, 2).map((detail, detailIndex) => {
@@ -1194,7 +927,7 @@ export default function ManagerDashboardView({
                         } else {
                           progressValue = parseInt(detail.value.replace(/\D/g, '')) || 75;
                         }
-                        
+
                         return (
                           <div key={detailIndex} className="space-y-1">
                             <div className="flex items-center justify-between">
@@ -1202,12 +935,11 @@ export default function ManagerDashboardView({
                               <span className={`text-xs font-bold ${detail.color}`}>{detail.value}</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div 
-                                className={`h-1.5 rounded-full transition-all duration-500 ${
-                                  kpi.color === "blue" ? "bg-gradient-to-r from-blue-400 to-blue-600" :
+                              <div
+                                className={`h-1.5 rounded-full transition-all duration-500 ${kpi.color === "blue" ? "bg-gradient-to-r from-blue-400 to-blue-600" :
                                   kpi.color === "green" ? "bg-gradient-to-r from-green-400 to-green-600" :
-                                  "bg-gradient-to-r from-purple-400 to-purple-600"
-                                }`}
+                                    "bg-gradient-to-r from-purple-400 to-purple-600"
+                                  }`}
                                 style={{ width: `${Math.min(progressValue, 100)}%` }}
                               ></div>
                             </div>
@@ -1261,19 +993,19 @@ export default function ManagerDashboardView({
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={currentTimeSeriesData} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis 
-                              dataKey="quarter" 
+                            <XAxis
+                              dataKey="quarter"
                               tick={{ fontSize: 10 }}
                               stroke="#6b7280"
                               label={{ value: 'Time Period', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fontSize: '10px' } }}
                             />
-                            <YAxis 
+                            <YAxis
                               tick={{ fontSize: 10 }}
                               stroke="#6b7280"
                               domain={['dataMin - 5', 'dataMax + 5']}
                               label={{ value: 'Effectiveness %', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px' } }}
                             />
-                            <RechartsTooltip 
+                            <RechartsTooltip
                               contentStyle={{
                                 backgroundColor: 'white',
                                 border: '2px solid #3b82f6',
@@ -1295,7 +1027,7 @@ export default function ManagerDashboardView({
                                     <div className="bg-white border-2 border-blue-500 rounded-xl p-4 shadow-xl min-w-[350px] relative">
                                       {/* Tooltip pointer/chevron - positioned towards the data point */}
                                       <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white border-l-2 border-b-2 border-blue-500 rotate-45"></div>
-                                      
+
                                       <div className="space-y-3">
                                         <div className="flex items-center justify-between border-b border-blue-100 pb-2">
                                           <div className="font-semibold text-blue-700">
@@ -1305,7 +1037,7 @@ export default function ManagerDashboardView({
                                             Effectiveness: {data.current}%
                                           </div>
                                         </div>
-                                        
+
                                         <div className="space-y-2">
                                           <div>
                                             <div className="text-sm font-semibold text-gray-900 mb-3">Current vs Last 3 Years Cumulative</div>
@@ -1357,18 +1089,18 @@ export default function ManagerDashboardView({
                               formatter={null}
 
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="current" 
-                              stroke="#3b82f6" 
+                            <Line
+                              type="monotone"
+                              dataKey="current"
+                              stroke="#3b82f6"
                               strokeWidth={2}
                               dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
                               name="Current"
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="previous" 
-                              stroke="#94a3b8" 
+                            <Line
+                              type="monotone"
+                              dataKey="previous"
+                              stroke="#94a3b8"
                               strokeWidth={1}
                               strokeDasharray="4 4"
                               dot={{ fill: '#94a3b8', strokeWidth: 2, r: 2 }}
@@ -1377,7 +1109,7 @@ export default function ManagerDashboardView({
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
-                      
+
                       {/* Key Insight */}
                       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
                         <div className="flex items-center justify-between">
@@ -1387,9 +1119,9 @@ export default function ManagerDashboardView({
                           </div>
                           <div className="text-right">
                             <div className="text-xl font-bold text-blue-900">
-                              {riskLevelFilter === "critical" ? "-12%" : 
-                               riskLevelFilter === "high" ? "-5%" : 
-                               riskLevelFilter === "low" ? "+33%" : "+25%"}
+                              {riskLevelFilter === "critical" ? "-12%" :
+                                riskLevelFilter === "high" ? "-5%" :
+                                  riskLevelFilter === "low" ? "+33%" : "+25%"}
                             </div>
                             <div className="flex items-center space-x-1 justify-end">
                               {(riskLevelFilter === "critical" || riskLevelFilter === "high") ? (
@@ -1397,21 +1129,20 @@ export default function ManagerDashboardView({
                               ) : (
                                 <TrendingUp className="h-3 w-3 text-green-600" />
                               )}
-                              <span className={`text-xs ${
-                                (riskLevelFilter === "critical" || riskLevelFilter === "high") ? "text-red-700" : "text-green-700"
-                              }`}>
+                              <span className={`text-xs ${(riskLevelFilter === "critical" || riskLevelFilter === "high") ? "text-red-700" : "text-green-700"
+                                }`}>
                                 {riskLevelFilter === "critical" ? "Critical challenges" :
-                                 riskLevelFilter === "high" ? "Needs attention" :
-                                 riskLevelFilter === "low" ? "Excellent progress" : "Strong improvement"}
+                                  riskLevelFilter === "high" ? "Needs attention" :
+                                    riskLevelFilter === "low" ? "Excellent progress" : "Strong improvement"}
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="mt-2 text-sm text-blue-800">
                           {riskLevelFilter === "critical" ? "Critical risk CERs face significant challenges with 12% lower effectiveness and extended closure times." :
-                           riskLevelFilter === "high" ? "High risk CERs show reduced effectiveness requiring focused attention and resource allocation." :
-                           riskLevelFilter === "low" ? "Low risk CERs demonstrate exceptional performance with 33% faster processing and higher compliance rates." :
-                           "CER effectiveness has improved significantly with 33% faster closure times and 11% higher compliance adherence compared to historical averages."}
+                            riskLevelFilter === "high" ? "High risk CERs show reduced effectiveness requiring focused attention and resource allocation." :
+                              riskLevelFilter === "low" ? "Low risk CERs demonstrate exceptional performance with 33% faster processing and higher compliance rates." :
+                                "CER effectiveness has improved significantly with 33% faster closure times and 11% higher compliance adherence compared to historical averages."}
                         </div>
                       </div>
                     </div>
@@ -1451,19 +1182,19 @@ export default function ManagerDashboardView({
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={pipelineData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis 
-                              dataKey="stage" 
+                            <XAxis
+                              dataKey="stage"
                               tick={{ fontSize: 10, fill: '#6b7280' }}
                               angle={-45}
                               textAnchor="end"
                               height={60}
                               interval={0}
                             />
-                            <YAxis 
+                            <YAxis
                               tick={{ fontSize: 10, fill: '#6b7280' }}
                               label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px' } }}
                             />
-                            <RechartsTooltip 
+                            <RechartsTooltip
                               contentStyle={{
                                 backgroundColor: 'white',
                                 border: '2px solid #6366f1',
@@ -1486,7 +1217,7 @@ export default function ManagerDashboardView({
                                             {data.count} items
                                           </div>
                                         </div>
-                                        
+
                                         <div className="grid grid-cols-2 gap-3 text-xs">
                                           <div>
                                             <div className="text-gray-600">Avg Time:</div>
@@ -1497,11 +1228,11 @@ export default function ManagerDashboardView({
                                             <div className="font-medium text-gray-900">{pipelineRiskFilter === 'all' ? 'All Levels' : pipelineRiskFilter.charAt(0).toUpperCase() + pipelineRiskFilter.slice(1)}</div>
                                           </div>
                                         </div>
-                                        
+
                                         <div className="pt-2 border-t border-indigo-100">
                                           <div className="text-xs text-gray-600 font-medium mb-2">Common Delays:</div>
                                           <div className="space-y-1">
-                                            {data.delayReasons.map((reason, idx) => (
+                                            {data.delayReasons.map((reason: any, idx: any) => (
                                               <div key={idx} className="flex items-start space-x-2 text-xs text-gray-700">
                                                 <div className="w-1 h-1 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0"></div>
                                                 <span>{reason}</span>
@@ -1583,13 +1314,12 @@ export default function ManagerDashboardView({
                       eta: "4 weeks"
                     }
                   ].map((bottleneck, index) => (
-                    <div key={index} className={`bg-white border-r-0 border-l-4 border-t border-b border-gray-200 rounded-lg p-2.5 hover:shadow-lg transition-all duration-300 ${
-                      bottleneck.impact === "Critical" 
-                        ? "border-l-red-500 hover:bg-red-50/30" 
-                        : bottleneck.impact === "High"
-                          ? "border-l-orange-500 hover:bg-orange-50/30"
-                          : "border-l-blue-500 hover:bg-blue-50/30"
-                    }`}>
+                    <div key={index} className={`bg-white border-r-0 border-l-4 border-t border-b border-gray-200 rounded-lg p-2.5 hover:shadow-lg transition-all duration-300 ${bottleneck.impact === "Critical"
+                      ? "border-l-red-500 hover:bg-red-50/30"
+                      : bottleneck.impact === "High"
+                        ? "border-l-orange-500 hover:bg-orange-50/30"
+                        : "border-l-blue-500 hover:bg-blue-50/30"
+                      }`}>
                       <div className="space-y-2">
                         <div className="flex items-start gap-2">
                           <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
@@ -1598,15 +1328,14 @@ export default function ManagerDashboardView({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-1.5 mb-1">
                               <h5 className="font-semibold text-gray-900 text-sm leading-tight">{bottleneck.issue}</h5>
-                              <Badge 
+                              <Badge
                                 variant="outline"
-                                className={`text-xs px-1.5 py-0.5 flex-shrink-0 font-medium ${
-                                  bottleneck.impact === "Critical" 
-                                    ? "border-red-300 text-red-700 bg-red-50" :
-                                  bottleneck.impact === "High" 
+                                className={`text-xs px-1.5 py-0.5 flex-shrink-0 font-medium ${bottleneck.impact === "Critical"
+                                  ? "border-red-300 text-red-700 bg-red-50" :
+                                  bottleneck.impact === "High"
                                     ? "border-orange-300 text-orange-700 bg-orange-50" :
                                     "border-blue-300 text-blue-700 bg-blue-50"
-                                }`}
+                                  }`}
                               >
                                 {bottleneck.impact}
                               </Badge>
@@ -1614,23 +1343,22 @@ export default function ManagerDashboardView({
                             <p className="text-xs text-gray-600 leading-relaxed mb-2">{bottleneck.description}</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center text-gray-600">
                             <Users className="h-3 w-3 mr-1 flex-shrink-0 text-gray-500" />
                             <span className="font-medium text-gray-700">SAP SE</span>
                           </div>
-                          <div className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                            bottleneck.eta === "1 week" || bottleneck.eta === "2 weeks"
-                              ? "bg-green-100 text-green-800 border border-green-200"
-                              : bottleneck.eta === "3 weeks" || bottleneck.eta === "4 weeks"
-                                ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                                : "bg-gray-100 text-gray-800 border border-gray-200"
-                          }`}>
+                          <div className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${bottleneck.eta === "1 week" || bottleneck.eta === "2 weeks"
+                            ? "bg-green-100 text-green-800 border border-green-200"
+                            : bottleneck.eta === "3 weeks" || bottleneck.eta === "4 weeks"
+                              ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                              : "bg-gray-100 text-gray-800 border border-gray-200"
+                            }`}>
                             ETA: {bottleneck.eta}
                           </div>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-md border border-gray-200 p-2">
                           <div className="text-xs text-gray-700 mb-0.5 font-medium">Recommended Action:</div>
                           <div className="text-xs text-gray-800 leading-relaxed">
@@ -1653,8 +1381,8 @@ export default function ManagerDashboardView({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-2">
                         <CardTitle className="text-base lg:text-lg font-medium text-gray-900">Vendor Quality & Productivity Analysis</CardTitle>
-                        <Badge 
-                          variant="secondary" 
+                        <Badge
+                          variant="secondary"
                           className={`text-xs cursor-pointer transition-colors ${vendorSortType === "top5" ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"}`}
                           onClick={() => setVendorSortType(vendorSortType === "top5" ? "low5" : "top5")}
                         >
@@ -1676,9 +1404,9 @@ export default function ManagerDashboardView({
                           Chart View
                         </Button>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-blue-600 border-blue-200 hover:bg-blue-50 text-xs px-2"
                         onClick={() => handleViewChange("vendor-analysis")}
                       >
@@ -1726,13 +1454,12 @@ export default function ManagerDashboardView({
                                 <span className="font-semibold text-gray-900 text-sm">{vendor.documentAcceptanceRate}%</span>
                               </TableCell>
                               <TableCell className="px-1 py-2 text-center">
-                                <Badge 
+                                <Badge
                                   variant={vendor.riskRating === "Low" ? "default" : vendor.riskRating === "Medium" ? "secondary" : "destructive"}
-                                  className={`text-sm px-2 py-1 ${
-                                    vendor.riskRating === "Low" ? "bg-green-100 text-green-800 border-green-200" : 
+                                  className={`text-sm px-2 py-1 ${vendor.riskRating === "Low" ? "bg-green-100 text-green-800 border-green-200" :
                                     vendor.riskRating === "Medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                                    "bg-red-100 text-red-800 border-red-200"
-                                  }`}
+                                      "bg-red-100 text-red-800 border-red-200"
+                                    }`}
                                 >
                                   {vendor.riskRating}
                                 </Badge>
@@ -1751,19 +1478,19 @@ export default function ManagerDashboardView({
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={vendorBarChartData} margin={{ top: 40, right: 30, left: 20, bottom: 60 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis 
-                            dataKey="metric" 
+                          <XAxis
+                            dataKey="metric"
                             tick={{ fontSize: 10, fill: '#6b7280' }}
                             angle={-45}
                             textAnchor="end"
                             height={60}
                             interval={0}
                           />
-                          <YAxis 
+                          <YAxis
                             tick={{ fontSize: 10, fill: '#6b7280' }}
                             label={{ value: 'Score %', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px' } }}
                           />
-                          <RechartsTooltip 
+                          <RechartsTooltip
                             contentStyle={{
                               backgroundColor: 'white',
                               border: '2px solid #3b82f6',
@@ -1776,10 +1503,10 @@ export default function ManagerDashboardView({
                             cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
                           />
                           {topVendorData.map((vendor, index) => (
-                            <Bar 
+                            <Bar
                               key={vendor.name}
-                              dataKey={vendor.name.split(' ')[0]} 
-                              fill={`hsl(${index * 72}, 70%, 50%)`} 
+                              dataKey={vendor.name.split(' ')[0]}
+                              fill={`hsl(${index * 72}, 70%, 50%)`}
                               name={vendor.name}
                               radius={[1, 1, 0, 0]}
                             />
@@ -1798,8 +1525,8 @@ export default function ManagerDashboardView({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-2">
                         <CardTitle className="text-base lg:text-lg font-medium text-gray-900">Analyst Workload & Output Analysis</CardTitle>
-                        <Badge 
-                          variant="secondary" 
+                        <Badge
+                          variant="secondary"
                           className={`text-xs cursor-pointer transition-colors ${analystSortType === "top5" ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"}`}
                           onClick={() => setAnalystSortType(analystSortType === "top5" ? "low5" : "top5")}
                         >
@@ -1821,9 +1548,9 @@ export default function ManagerDashboardView({
                           Chart View
                         </Button>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="text-blue-600 border-blue-200 hover:bg-blue-50 text-xs px-2"
                         onClick={() => handleViewChange("analyst-analysis")}
                       >
@@ -1868,13 +1595,12 @@ export default function ManagerDashboardView({
                                 <span className="text-gray-900 text-sm">{analyst.responseTimeToVendor}</span>
                               </TableCell>
                               <TableCell className="px-1 py-2 text-center">
-                                <Badge 
+                                <Badge
                                   variant={analyst.bottleneckProactiveness === "High" ? "default" : analyst.bottleneckProactiveness === "Medium" ? "secondary" : "outline"}
-                                  className={`text-sm px-2 py-1 ${
-                                    analyst.bottleneckProactiveness === "High" ? "bg-green-100 text-green-800 border-green-200" : 
+                                  className={`text-sm px-2 py-1 ${analyst.bottleneckProactiveness === "High" ? "bg-green-100 text-green-800 border-green-200" :
                                     analyst.bottleneckProactiveness === "Medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                                    "bg-gray-100 text-gray-800 border-gray-200"
-                                  }`}
+                                      "bg-gray-100 text-gray-800 border-gray-200"
+                                    }`}
                                 >
                                   {analyst.bottleneckProactiveness}
                                 </Badge>
@@ -1887,51 +1613,51 @@ export default function ManagerDashboardView({
                         </TableBody>
                       </Table>
                     </div>
-                ) : (
-                  /* Bar Chart View */
-                  <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={analystBarChartData} margin={{ top: 40, right: 30, left: 20, bottom: 60 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis 
-                          dataKey="metric" 
-                          tick={{ fontSize: 10, fill: '#6b7280' }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={60}
-                          interval={0}
-                        />
-                        <YAxis 
-                          tick={{ fontSize: 10, fill: '#6b7280' }}
-                          label={{ value: 'Score', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px' } }}
-                        />
-                        <RechartsTooltip 
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '2px solid #10b981',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            minWidth: '280px',
-                            padding: '16px',
-                            boxShadow: '0 10px 25px rgba(16, 185, 129, 0.15)'
-                          }}
-                          cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
-                        />
-                        {topAnalystData.map((analyst, index) => (
-                          <Bar 
-                            key={analyst.name}
-                            dataKey={analyst.name.split(' ')[0]} 
-                            fill={`hsl(${index * 60}, 70%, 50%)`} 
-                            name={analyst.name}
-                            radius={[1, 1, 0, 0]}
+                  ) : (
+                    /* Bar Chart View */
+                    <div className="h-80 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={analystBarChartData} margin={{ top: 40, right: 30, left: 20, bottom: 60 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis
+                            dataKey="metric"
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                            interval={0}
                           />
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                          <YAxis
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            label={{ value: 'Score', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px' } }}
+                          />
+                          <RechartsTooltip
+                            contentStyle={{
+                              backgroundColor: 'white',
+                              border: '2px solid #10b981',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              minWidth: '280px',
+                              padding: '16px',
+                              boxShadow: '0 10px 25px rgba(16, 185, 129, 0.15)'
+                            }}
+                            cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+                          />
+                          {topAnalystData.map((analyst, index) => (
+                            <Bar
+                              key={analyst.name}
+                              dataKey={analyst.name.split(' ')[0]}
+                              fill={`hsl(${index * 60}, 70%, 50%)`}
+                              name={analyst.name}
+                              radius={[1, 1, 0, 0]}
+                            />
+                          ))}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             

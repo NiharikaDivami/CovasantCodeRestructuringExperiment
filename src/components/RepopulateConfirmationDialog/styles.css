@@ -1,0 +1,104 @@
+/* RepopulateConfirmationDialog styles converted from Tailwind */
+
+.repopulate-dialog-content {
+  max-width: 32rem;
+}
+
+.repopulate-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.repopulate-title-icon {
+  height: 20px;
+  width: 20px;
+  color: #2563eb;
+}
+
+.repopulate-description {
+  font-size: 1rem;
+  color: #374151;
+}
+
+.repopulate-list {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+  list-style: none;
+  padding-left: 0;
+}
+.repopulate-list li {
+  margin-bottom: 4px;
+}
+
+.repopulate-insights {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.repopulate-insights-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.repopulate-insights-icon {
+  height: 16px;
+  width: 16px;
+  color: #4b5563;
+}
+
+.repopulate-insights-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.repopulate-insights-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.repopulate-ai-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #2563eb;
+}
+
+.repopulate-action {
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.2s;
+}
+.repopulate-action:hover {
+  background: #1d4ed8;
+}
+
+.repopulate-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.repopulate-action-icon {
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+}
+
+.repopulate-action-spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

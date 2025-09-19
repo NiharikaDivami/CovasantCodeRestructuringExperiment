@@ -8,19 +8,19 @@ import { Bot, User, FileText, Send, Loader2, RefreshCw, CheckCircle, ChevronDown
 import { ScrollArea } from "../ui/scroll-area";
 import { toast } from "sonner@2.0.3";
 import ClickableCitations from "../ClickableCitations";
-import SupportiveDocumentsPanel from "../SupportiveDocumentsPanel";
+import SupportiveDocumentsPanel from "../SupportiveDocumentsPanel/SupportiveDocumentsPanel.tsx";
 import DocumentMentionTextarea from "../DocumentMentionTextarea/index";
-import InlayDocumentCitation from "../InlayDocumentCitation";
+import InlayDocumentCitation from "../../components/InlayDocumentCitation/index.tsx";
 import ActivityLog from "../ActivityLog/ActivityLog";
 import type { ConversationalTranscriptDetailViewProps, ChatMessage } from "./types";
 import { CITATION_REGEX, CITATION_MAP, ANALYSIS_CONTENT, DEFAULT_ANALYSIS, BASE_DOCUMENTS, BASE_ACTIVITIES, REQUIREMENT_MAP } from "./constants";
 import "./styles.css";
 
-export default function ConversationalTranscriptDetailView({ 
-  scriptId, 
-  onBack, 
-  onBackToDashboard, 
-  onScriptUpdate, 
+export default function ConversationalTranscriptDetailView({
+  scriptId,
+  onBack,
+  onBackToDashboard,
+  onScriptUpdate,
   onApproveAndNavigate,
   onVersionUpdate,
   scriptTitle,
@@ -50,7 +50,7 @@ export default function ConversationalTranscriptDetailView({
   const [isAIReasoningExpanded, setIsAIReasoningExpanded] = useState(false);
   const [currentVersion, setCurrentVersion] = useState("v1");
   const [allVersions, setAllVersions] = useState<ChatMessage[]>([]);
-  
+
   const getAIAnalysisContent = (sid: string) => ANALYSIS_CONTENT[sid] || DEFAULT_ANALYSIS;
 
   const getSupportiveDocuments = (sid: string) => {
@@ -94,13 +94,13 @@ export default function ConversationalTranscriptDetailView({
         },
         isLatest: versionHistory.length === 0,
       };
-      
+
       allMessages = [originalMessage];
     }
 
     if (versionHistory && versionHistory.length > 0) {
       const sortedHistory = [...versionHistory].sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      
+
       sortedHistory.forEach((version: any, index: number) => {
         if (version.humanInsight) {
           const humanMessage: ChatMessage = {
@@ -112,7 +112,7 @@ export default function ConversationalTranscriptDetailView({
           };
           allMessages.push(humanMessage);
         }
-        
+
         const aiMessage: ChatMessage = {
           id: `ai-version-${version.version}`,
           type: "ai",
@@ -131,15 +131,15 @@ export default function ConversationalTranscriptDetailView({
         };
         allMessages.push(aiMessage);
       });
-      
+
       setHasVersionHistory(true);
-      
+
       const approved = sortedHistory.filter((v: any) => v.status === 'approved');
       if (approved.length > 0) {
         const latestApproved = approved[approved.length - 1];
         const latestApprovedIndex = sortedHistory.findIndex((v: any) => v.version === latestApproved.version && v.status === 'approved');
         const hasVersionsAfterApproved = latestApprovedIndex < sortedHistory.length - 1;
-        
+
         if (hasVersionsAfterApproved) {
           const latestVersion = sortedHistory[sortedHistory.length - 1];
           setCurrentVersion(latestVersion.version);
@@ -166,7 +166,7 @@ export default function ConversationalTranscriptDetailView({
 
     const userInput = inputMessage;
     setIsProcessing(true);
-    
+
     const humanMessage: ChatMessage = {
       id: `human-${Date.now()}`,
       type: "human",
@@ -189,7 +189,7 @@ export default function ConversationalTranscriptDetailView({
           text: `Thank you for your input. I understand your concern about "${userInput}". Based on the available evidence [SOC2 Report 2025, pg 8, para 3], I can provide additional analysis to address this point. Would you like me to elaborate on any specific aspect of the control assessment?`,
         },
       };
-      
+
       setMessages((prev) => [...prev, aiResponse]);
       setIsProcessing(false);
       setScrollToBottom(true);
@@ -198,12 +198,12 @@ export default function ConversationalTranscriptDetailView({
 
   const handleApprove = async () => {
     setIsApproving(true);
-    
+
     setTimeout(() => {
       setIsApproved(true);
       setHasRepopulatedAfterApproval(false);
       setIsApproving(false);
-      
+
       toast("Analysis approved successfully", {
         className: "border-green-500 bg-green-100 text-green-800 font-medium shadow-lg",
         style: { backgroundColor: "#dcfce7", borderColor: "#22c55e", color: "#166534" },
@@ -220,7 +220,7 @@ export default function ConversationalTranscriptDetailView({
 
   const handleRepopulate = () => {
     const humanInsightText = inputMessage.trim();
-    
+
     if (humanInsightText) {
       const humanMessage: ChatMessage = {
         id: `human-repopulate-${Date.now()}`,
@@ -229,21 +229,21 @@ export default function ConversationalTranscriptDetailView({
         timestamp: "Now",
         content: { text: humanInsightText },
       };
-      
+
       setMessages((prev) => [...prev, humanMessage]);
       setInputMessage("");
       setScrollToBottom(true);
-      
+
       setTimeout(() => {
         setIsRepopulating(true);
-        
+
         setTimeout(() => {
           setMessages((currentMessages) => {
             const allVersionNumbers = currentMessages
               .filter((msg) => msg.type === "ai" && msg.version)
               .map((msg) => parseInt((msg.version as string).slice(1)))
               .filter((num) => !isNaN(num));
-            
+
             const nextVersionNum = allVersionNumbers.length > 0 ? Math.max(...allVersionNumbers) + 1 : 2;
             const nextVersionNumber = `v${nextVersionNum}`;
             setCurrentVersion(nextVersionNumber);
@@ -272,20 +272,20 @@ export default function ConversationalTranscriptDetailView({
 
             const updatedMessages = currentMessages.map((msg) => ({ ...msg, isLatest: false }));
             const finalMessages = [...updatedMessages, updatedMessage];
-            
+
             if (onVersionUpdate) {
               const versionUpdateWithInsight: any = { ...updatedMessage, humanInsight: humanInsightText };
               onVersionUpdate(nextVersionNumber, versionUpdateWithInsight);
             }
-            
+
             setHasRepopulatedAfterApproval(true);
             return finalMessages;
           });
-          
+
           setHasVersionHistory(true);
           setIsRepopulating(false);
           setScrollToBottom(true);
-          
+
           toast("Analysis updated with latest information", {
             className: "border-blue-500 bg-blue-100 text-blue-800 font-medium shadow-lg",
             style: { backgroundColor: "#dbeafe", borderColor: "#3b82f6", color: "#1e40af" },
@@ -294,14 +294,14 @@ export default function ConversationalTranscriptDetailView({
       }, 500);
     } else {
       setIsRepopulating(true);
-      
+
       setTimeout(() => {
         setMessages((currentMessages) => {
           const allVersionNumbers = currentMessages
             .filter((msg) => msg.type === "ai" && msg.version)
             .map((msg) => parseInt((msg.version as string).slice(1)))
             .filter((num) => !isNaN(num));
-          
+
           const nextVersionNum = allVersionNumbers.length > 0 ? Math.max(...allVersionNumbers) + 1 : 2;
           const nextVersionNumber = `v${nextVersionNum}`;
           setCurrentVersion(nextVersionNumber);
@@ -330,19 +330,19 @@ export default function ConversationalTranscriptDetailView({
 
           const updatedMessages = currentMessages.map((msg) => ({ ...msg, isLatest: false }));
           const finalMessages = [...updatedMessages, updatedMessage];
-          
+
           if (onVersionUpdate) {
             onVersionUpdate(nextVersionNumber, updatedMessage);
           }
-          
+
           setHasRepopulatedAfterApproval(true);
           return finalMessages;
         });
-        
+
         setHasVersionHistory(true);
         setIsRepopulating(false);
         setScrollToBottom(true);
-        
+
         toast("Analysis updated with latest information", {
           className: "border-blue-500 bg-blue-100 text-blue-800 font-medium shadow-lg",
           style: { backgroundColor: "#dbeafe", borderColor: "#3b82f6", color: "#1e40af" },
@@ -394,7 +394,7 @@ export default function ConversationalTranscriptDetailView({
         };
         return cerToVendorMap[cerId] || "Unknown Vendor";
       };
-      
+
       const vendorName = getCERVendorName(parentCerId);
       onActionItemCreated(scriptTitle, parentCerId, vendorName);
     }
@@ -436,7 +436,7 @@ export default function ConversationalTranscriptDetailView({
     }
   };
 
-  const [selectedCitation, setSelectedCitation] = useState<{documentName: string; page: number; paragraph: number; highlightText: string} | null>(null);
+  const [selectedCitation, setSelectedCitation] = useState<{ documentName: string; page: number; paragraph: number; highlightText: string } | null>(null);
   const [isCitationPanelOpen, setIsCitationPanelOpen] = useState(false);
   const [isSupportiveDocumentsOpen, setIsSupportiveDocumentsOpen] = useState(true);
   const [isSupportiveDocumentsExpanded, setIsSupportiveDocumentsExpanded] = useState(true);
@@ -492,7 +492,7 @@ export default function ConversationalTranscriptDetailView({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <Button
                 variant={isActivityLogOpen ? "default" : "outline"}
@@ -511,7 +511,7 @@ export default function ConversationalTranscriptDetailView({
                 <Clock className="h-4 w-4" />
                 <span className="hidden sm:inline">Activity</span>
               </Button>
-              
+
               {(!isCurrentVersionApproved() || hasRepopulatedAfterApproval) && (
                 <>
                   <Button
@@ -528,7 +528,7 @@ export default function ConversationalTranscriptDetailView({
                   </Button>
                 </>
               )}
-              
+
               {isCurrentVersionApproved() && !hasRepopulatedAfterApproval && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -540,17 +540,17 @@ export default function ConversationalTranscriptDetailView({
         </div>
 
         <div className="flex-1 flex overflow-hidden min-h-0">
-          <div 
+          <div
             className={`${isCitationPanelOpen ? 'border-r' : ''} transition-all duration-300 flex flex-col`}
             style={{
-              width: isCitationPanelOpen 
-                ? '50%' 
+              width: isCitationPanelOpen
+                ? '50%'
                 : (isActivityLogOpen || isSupportiveDocumentsOpen)
                   ? isActivityLogOpen
                     ? isActivityLogExpanded
                       ? 'calc(100% - 360px)'
                       : 'calc(100% - 104px)'
-                    : isSupportiveDocumentsExpanded 
+                    : isSupportiveDocumentsExpanded
                       ? 'calc(100% - 360px)'
                       : 'calc(100% - 104px)'
                   : '60%'
@@ -562,7 +562,7 @@ export default function ConversationalTranscriptDetailView({
                   {messages.map((message, index) => {
                     const isNewAnalysisVersion = message.type === "ai" && message.version && message.content.title &&
                       (index === 0 || messages[index - 1].type === "human" || (messages[index - 1].type === "ai" && messages[index - 1].version !== message.version));
-                    
+
                     return (
                       <div key={message.id}>
                         {isNewAnalysisVersion && index > 0 && (
@@ -574,7 +574,7 @@ export default function ConversationalTranscriptDetailView({
                             <div className="flex-1 h-px bg-gray-200"></div>
                           </div>
                         )}
-                        
+
                         <div className={`flex gap-3 ${message.type === "human" ? "flex-row-reverse" : ""}`}>
                           <div className="flex-shrink-0">
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center ${message.type === "ai" ? "bg-blue-100" : "bg-gray-100"}`}>
@@ -782,8 +782,8 @@ export default function ConversationalTranscriptDetailView({
             (isActivityLogOpen || isSupportiveDocumentsOpen) && (
               <div className="flex-shrink-0 transition-all duration-300">
                 {isActivityLogOpen ? (
-                  <ActivityLog 
-                    activities={getActivityLogData(scriptId)} 
+                  <ActivityLog
+                    activities={getActivityLogData(scriptId)}
                     onClose={() => {
                       setIsActivityLogOpen(false);
                       setShouldOpenSupportiveDocsCollapsed(true);
@@ -792,7 +792,7 @@ export default function ConversationalTranscriptDetailView({
                     onExpandedChange={setIsActivityLogExpanded}
                   />
                 ) : (
-                  <SupportiveDocumentsPanel 
+                  <SupportiveDocumentsPanel
                     isOpen={isSupportiveDocumentsOpen}
                     onClose={() => setIsSupportiveDocumentsOpen(false)}
                     documents={getSupportiveDocuments(scriptId)}
@@ -819,10 +819,10 @@ export default function ConversationalTranscriptDetailView({
           )}
         </div>
 
-        <div 
+        <div
           className="bg-white border-t p-3 flex-shrink-0 transition-all duration-300"
           style={{
-            width: isCitationPanelOpen 
+            width: isCitationPanelOpen
               ? '50%'
               : (isActivityLogOpen || isSupportiveDocumentsOpen)
                 ? isActivityLogOpen
@@ -833,7 +833,7 @@ export default function ConversationalTranscriptDetailView({
                     ? 'calc(100% - 320px)'
                     : 'calc(100% - 64px)'
                 : '100%',
-            marginRight: isCitationPanelOpen 
+            marginRight: isCitationPanelOpen
               ? '0'
               : (isActivityLogOpen || isSupportiveDocumentsOpen)
                 ? isActivityLogOpen
@@ -859,7 +859,7 @@ export default function ConversationalTranscriptDetailView({
               />
             </div>
             <div className="flex flex-col flex-shrink-0 min-w-fit">
-              <Button 
+              <Button
                 onClick={handleRepopulate}
                 disabled={isRepopulating}
                 variant="outline"

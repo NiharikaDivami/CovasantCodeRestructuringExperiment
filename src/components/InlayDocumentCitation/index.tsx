@@ -3,7 +3,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { FileText, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { DEFAULT_CITATION_PAGE } from "./constants";
-import { Citation, InlayDocumentCitationProps } from "./types";
+import type { Citation, InlayDocumentCitationProps } from "./types";
 
 export default function InlayDocumentCitation({ citation, onClose, searchQuery = "", onMapToTextArea }: InlayDocumentCitationProps) {
   const citationRef = useRef<HTMLElement>(null);

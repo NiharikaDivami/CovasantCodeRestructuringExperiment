@@ -1,0 +1,59 @@
+.request-modal-content {
+  max-width: 500px;
+}
+
+.request-modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-modal-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.request-modal-input {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.request-modal-select {
+  width: 100%;
+}
+
+.request-modal-textarea {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  width: 100%;
+  resize: none;
+  min-height: 64px;
+}
+
+.request-modal-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.request-modal-checkbox-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.request-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
